@@ -1,8 +1,13 @@
+import "dotenv/config";
+console.log("MONGO_URI loaded:", !!process.env.MONGO_URI);
 import express from "express";
+import connectDB from "./config/db.js";
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
+
+connectDB();
 
 app.use(express.json());
 
