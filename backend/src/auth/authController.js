@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Organization from "../models/Organization.js";
-import { hashPassword } from "../utils/password.js";
-
+import { hashPassword, comparePassword } from "../utils/password.js";
+import jwt from "jsonwebtoken";
 export const register = async (req, res) => {
   try {
     const {
@@ -13,14 +13,12 @@ export const register = async (req, res) => {
       departmentId
     } = req.body;
 
-    // 1. Validate required fields
     if (!name || !email || !password || !role || !organizationId) {
       return res.status(400).json({
         message: "Required fields are missing"
       });
     }
 
-    // 2. Check whether organization exists
     const organization = await Organization.findById(organizationId);
 
     if (!organization) {
@@ -29,7 +27,6 @@ export const register = async (req, res) => {
       });
     }
 
-    // 3. Check whether user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -38,10 +35,8 @@ export const register = async (req, res) => {
       });
     }
 
-    // 4. Hash password before storing it
     const passwordHash = await hashPassword(password);
 
-    // 5. Create user
     const user = await User.create({
       name,
       email,
@@ -51,7 +46,6 @@ export const register = async (req, res) => {
       departmentId
     });
 
-    // 6. Never return passwordHash
     return res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -66,6 +60,75 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error("Registration error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required"
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password"
+      });
+    }
+
+    const isPasswordValid = await comparePassword(
+      password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: "Invalid email or password"
+      });
+    }
+
+    if (user.status !== "ACTIVE") {
+      return res.status(403).json({
+        message: "User account is inactive"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        organizationId: user.organizationId,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h"
+      }
+    );
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organizationId: user.organizationId,
+        departmentId: user.departmentId,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    console.error("Login error:", error.message);
 
     return res.status(500).json({
       message: "Internal server error"
