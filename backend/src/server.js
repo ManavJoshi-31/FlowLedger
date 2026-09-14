@@ -4,6 +4,7 @@ import connectDB from "./config/db.js";
 //import routes
 import authRoutes from "./auth/authRoute.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
+import departmentRoutes from "./routes/departmentRoutes.js";
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -11,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 app.use(express.json());
 app.use("/api/organizations", organizationRoutes);
-
+app.use("/api/departments", departmentRoutes);
 app.get("/api/test", (req, res) => {
   res.status(200).json({
     success: true,
