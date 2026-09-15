@@ -72,3 +72,64 @@ export const createDepartment = async (req, res) => {
     });
   }
 };
+export const updateDepartment = async (req, res) => {
+  try {
+    const { departmentId } = req.params;
+    const { name, description, status } = req.body;
+
+    const department = await Department.findById(departmentId);
+
+    if (!department) {
+      return res.status(404).json({
+        message: "Department not found",
+      });
+    }
+
+    if (
+      department.organizationId.toString() !==
+      req.user.organizationId.toString()
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to update this department",
+      });
+    }
+
+    if (name !== undefined) {
+      const existingDepartment = await Department.findOne({
+        organizationId: req.user.organizationId,
+        name,
+        _id: { $ne: departmentId },
+      });
+
+      if (existingDepartment) {
+        return res.status(409).json({
+          message:
+            "Department with this name already exists in the organization",
+        });
+      }
+
+      department.name = name;
+    }
+
+    if (description !== undefined) {
+      department.description = description;
+    }
+
+    if (status !== undefined) {
+      department.status = status;
+    }
+
+    await department.save();
+
+    return res.status(200).json({
+      message: "Department updated successfully",
+      department,
+    });
+  } catch (error) {
+    console.error("Update department error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
