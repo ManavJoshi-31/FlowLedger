@@ -84,3 +84,41 @@ export const createBudget = async (req, res) => {
     });
   }
 };
+
+export const getBudgets = async (req, res) => {
+  try {
+    const organizationId = req.user.organizationId;
+
+    let filter = {
+      organizationId,
+    };
+
+    if (req.user.role === "DEPARTMENT_MANAGER") {
+      const department = await Department.findOne({
+        managerId: req.user.userId,
+        organizationId,
+      });
+
+      if (!department) {
+        return res.status(404).json({
+          message: "Department managed by user not found",
+        });
+      }
+
+      filter.departmentId = department._id;
+    }
+
+    const budgets = await Budget.find(filter);
+
+    return res.status(200).json({
+      message: "Budgets fetched successfully",
+      budgets,
+    });
+  } catch (error) {
+    console.error("Get budgets error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
