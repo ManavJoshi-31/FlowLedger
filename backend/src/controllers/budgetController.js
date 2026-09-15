@@ -4,10 +4,10 @@ import Department from "../models/Department.js";
 
 export const createBudget = async (req, res) => {
   try {
-    const { organizationId, departmentId, totalAmount, period } = req.body;
+    const { departmentId, totalAmount, period } = req.body;
+    const organizationId = req.user.organizationId;
 
     if (
-      !organizationId ||
       !departmentId ||
       totalAmount === undefined ||
       !period?.startDate ||
@@ -49,6 +49,19 @@ export const createBudget = async (req, res) => {
     if (new Date(period.startDate) >= new Date(period.endDate)) {
       return res.status(400).json({
         message: "Budget start date must be before end date",
+      });
+    }
+
+    const existingBudget = await Budget.findOne({
+      organizationId,
+      departmentId,
+      "period.startDate": new Date(period.startDate),
+      "period.endDate": new Date(period.endDate),
+    });
+
+    if (existingBudget) {
+      return res.status(409).json({
+        message: "Budget already exists for this department and period",
       });
     }
 
