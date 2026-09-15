@@ -1,0 +1,73 @@
+import Budget from "../models/Budget.js";
+import Organization from "../models/Organization.js";
+import Department from "../models/Department.js";
+
+export const createBudget = async (req, res) => {
+  try {
+    const { organizationId, departmentId, totalAmount, period } = req.body;
+
+    if (
+      !organizationId ||
+      !departmentId ||
+      totalAmount === undefined ||
+      !period?.startDate ||
+      !period?.endDate
+    ) {
+      return res.status(400).json({
+        message: "Required budget fields are missing",
+      });
+    }
+
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({
+        message: "Organization not found",
+      });
+    }
+
+    const department = await Department.findById(departmentId);
+
+    if (!department) {
+      return res.status(404).json({
+        message: "Department not found",
+      });
+    }
+
+    if (department.organizationId.toString() !== organizationId) {
+      return res.status(400).json({
+        message: "Department does not belong to this organization",
+      });
+    }
+
+    if (Number(totalAmount) < 0) {
+      return res.status(400).json({
+        message: "Total amount cannot be negative",
+      });
+    }
+
+    if (new Date(period.startDate) >= new Date(period.endDate)) {
+      return res.status(400).json({
+        message: "Budget start date must be before end date",
+      });
+    }
+
+    const budget = await Budget.create({
+      organizationId,
+      departmentId,
+      totalAmount,
+      period,
+    });
+
+    return res.status(201).json({
+      message: "Budget created successfully",
+      budget,
+    });
+  } catch (error) {
+    console.error("Create budget error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
