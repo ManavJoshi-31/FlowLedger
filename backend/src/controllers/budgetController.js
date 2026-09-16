@@ -174,3 +174,67 @@ export const getBudgetById = async (req, res) => {
     });
   }
 };
+export const updateBudget = async (req, res) => {
+  try {
+    const { budgetId } = req.params;
+    const { totalAmount, period } = req.body;
+
+    const organizationId = req.user.organizationId;
+
+    const budget = await Budget.findById(budgetId);
+
+    if (!budget) {
+      return res.status(404).json({
+        message: "Budget not found",
+      });
+    }
+
+    if (budget.organizationId.toString() !== organizationId.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to update this budget",
+      });
+    }
+
+    if (totalAmount !== undefined) {
+      if (Number(totalAmount) < 0) {
+        return res.status(400).json({
+          message: "Total amount cannot be negative",
+        });
+      }
+
+      budget.totalAmount = totalAmount;
+    }
+
+    if (period !== undefined) {
+      const startDate =
+        period.startDate !== undefined
+          ? new Date(period.startDate)
+          : budget.period.startDate;
+      const endDate =
+        period.endDate !== undefined
+          ? new Date(period.endDate)
+          : budget.period.endDate;
+      if (startDate >= endDate) {
+        return res.status(400).json({
+          message: "Budget start date must be before end date",
+        });
+      }
+
+      budget.period.startDate = startDate;
+      budget.period.endDate = endDate;
+    }
+
+    await budget.save();
+
+    return res.status(200).json({
+      message: "Budget updated successfully",
+      budget,
+    });
+  } catch (error) {
+    console.error("Update budget error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
