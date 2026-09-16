@@ -4,6 +4,7 @@ import {
   getBudgetById,
   getBudgets,
   updateBudget,
+  closeBudget,
 } from "../controllers/budgetController.js";
 import { authenticate, authorizeRole } from "../auth/authMiddleware.js";
 
@@ -32,5 +33,11 @@ router.patch(
   authenticate,
   authorizeRole("FINANCE_MANAGER", "ORGANIZATION_ADMIN"),
   updateBudget,
+);
+router.patch(
+  "/:budgetId/close",
+  authenticate,
+  authorizeRole("FINANCE_MANAGER", "ORGANIZATION_ADMIN"),
+  closeBudget,
 );
 export default router;
