@@ -34,7 +34,7 @@ export const createBudget = async (req, res) => {
       });
     }
 
-    if (department.organizationId.toString() !== organizationId) {
+    if (department.organizationId.toString() !== organizationId.toString()) {
       return res.status(400).json({
         message: "Department does not belong to this organization",
       });
@@ -192,6 +192,12 @@ export const updateBudget = async (req, res) => {
     if (budget.organizationId.toString() !== organizationId.toString()) {
       return res.status(403).json({
         message: "You are not authorized to update this budget",
+      });
+    }
+
+    if (budget.status === "CLOSED") {
+      return res.status(400).json({
+        message: "Closed budget cannot be updated",
       });
     }
 
