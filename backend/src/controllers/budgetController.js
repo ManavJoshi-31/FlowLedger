@@ -122,3 +122,55 @@ export const getBudgets = async (req, res) => {
     });
   }
 };
+export const getBudgetById = async (req, res) => {
+  try {
+    const { budgetId } = req.params;
+    const organizationId = req.user.organizationId;
+
+    const budget = await Budget.findById(budgetId);
+
+    if (!budget) {
+      return res.status(404).json({
+        message: "Budget not found",
+      });
+    }
+
+    // Organization isolation
+    if (budget.organizationId.toString() !== organizationId.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to access this budget",
+      });
+    }
+
+    // Department Manager can only access their department's budget
+    if (req.user.role === "DEPARTMENT_MANAGER") {
+      const department = await Department.findOne({
+        managerId: req.user.userId,
+        organizationId,
+      });
+
+      if (!department) {
+        return res.status(404).json({
+          message: "Department managed by user not found",
+        });
+      }
+
+      if (budget.departmentId.toString() !== department._id.toString()) {
+        return res.status(403).json({
+          message: "You are not authorized to access this budget",
+        });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Budget fetched successfully",
+      budget,
+    });
+  } catch (error) {
+    console.error("Get budget error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
