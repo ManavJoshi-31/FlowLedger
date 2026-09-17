@@ -84,7 +84,7 @@ export const createUser = async (req, res) => {
       // Department Manager can only use their own department
       if (
         creatorRole === "DEPARTMENT_MANAGER" &&
-        department._id.toString() !== req.user.departmentId.toString()
+        department._id.toString() !== managerDepartmentId.toString()
       ) {
         return res.status(403).json({
           message:
