@@ -1,6 +1,6 @@
 import FinancialRequest from "../models/FinancialRequest.js";
-import User from "../models/User.js";
 import Budget from "../models/Budget.js";
+import User from "../models/User.js";
 export const createFinancialRequest = async (req, res) => {
   try {
     const { budgetId, title, description, amount, category } = req.body;
@@ -80,7 +80,6 @@ export const createFinancialRequest = async (req, res) => {
     if (Number(amount) > availableAmount) {
       status = "DRAFT";
     }
-
     // 11. Create financial request
     const financialRequest = await FinancialRequest.create({
       organizationId: user.organizationId,
