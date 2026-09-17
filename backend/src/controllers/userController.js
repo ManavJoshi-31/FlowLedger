@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import Organization from "../models/Organization.js";
 import Department from "../models/Department.js";
 import { hashPassword } from "../utils/password.js";
 
@@ -16,7 +15,13 @@ export const createUser = async (req, res) => {
         message: "Name, email, password and role are required",
       });
     }
-
+    // 2. Organization Admin accounts cannot be created
+    if (role === "ORGANIZATION_ADMIN") {
+      return res.status(403).json({
+        message:
+          "Organization Admin accounts cannot be created through this API",
+      });
+    }
     // 2. Check duplicate email
     const existingUser = await User.findOne({ email });
 
@@ -140,11 +145,49 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // 2. User must belong to the admin's organization
-    if (user.organizationId.toString() !== req.user.organizationId.toString()) {
-      return res.status(403).json({
-        message: "You are not authorized to update this user",
+    // 2. Authorization based on role
+
+    if (req.user.role === "ORGANIZATION_ADMIN") {
+      // Admin can update users in their organization
+      if (
+        user.organizationId.toString() !== req.user.organizationId.toString()
+      ) {
+        return res.status(403).json({
+          message: "You are not authorized to update this user",
+        });
+      }
+    }
+
+    if (req.user.role === "DEPARTMENT_MANAGER") {
+      // Manager can only update employees
+      if (user.role !== "EMPLOYEE") {
+        return res.status(403).json({
+          message: "Department Manager can update employees only",
+        });
+      }
+
+      // Find manager's current department
+      const managerDepartment = await Department.findOne({
+        managerId: req.user.userId,
+        organizationId: req.user.organizationId,
       });
+
+      if (!managerDepartment) {
+        return res.status(400).json({
+          message: "Department Manager is not assigned to a department",
+        });
+      }
+
+      // Employee must belong to manager's department
+      if (
+        !user.departmentId ||
+        user.departmentId.toString() !== managerDepartment._id.toString()
+      ) {
+        return res.status(403).json({
+          message:
+            "You are not authorized to update users outside your department",
+        });
+      }
     }
 
     // 3. Update name
@@ -183,8 +226,15 @@ export const updateUser = async (req, res) => {
         department.organizationId.toString() !==
         req.user.organizationId.toString()
       ) {
-        return res.status(400).json({
+        return res.status(403).json({
           message: "Department does not belong to your organization",
+        });
+      }
+
+      // Department Manager cannot move employees
+      if (req.user.role === "DEPARTMENT_MANAGER") {
+        return res.status(403).json({
+          message: "Department Manager cannot change an employee's department",
         });
       }
 
