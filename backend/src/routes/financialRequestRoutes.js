@@ -4,6 +4,7 @@ import {
   createFinancialRequest,
   getPendingRequests,
   approveFinancialRequest,
+  rejectFinancialRequest,
 } from "../controllers/financialRequestController.js";
 
 import { authenticate, authorizeRole } from "../auth/authMiddleware.js";
@@ -29,5 +30,11 @@ router.patch(
   authenticate,
   authorizeRole("DEPARTMENT_MANAGER"),
   approveFinancialRequest,
+);
+router.patch(
+  "/:requestId/reject",
+  authenticate,
+  authorizeRole("DEPARTMENT_MANAGER"),
+  rejectFinancialRequest,
 );
 export default router;

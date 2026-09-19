@@ -228,3 +228,78 @@ export const approveFinancialRequest = async (req, res) => {
     });
   }
 };
+export const rejectFinancialRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { remarks } = req.body;
+
+    const userId = req.user.userId;
+    const organizationId = req.user.organizationId;
+
+    const financialRequest = await FinancialRequest.findById(requestId);
+
+    if (!financialRequest) {
+      return res.status(404).json({
+        message: "Financial request not found",
+      });
+    }
+
+    if (
+      financialRequest.organizationId.toString() !== organizationId.toString()
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to reject this request",
+      });
+    }
+
+    if (financialRequest.status !== "PENDING") {
+      return res.status(400).json({
+        message: "Only pending requests can be rejected",
+      });
+    }
+
+    const department = await Department.findOne({
+      managerId: userId,
+      organizationId,
+    });
+
+    if (!department) {
+      return res.status(400).json({
+        message: "Department Manager is not assigned to a department",
+      });
+    }
+
+    if (
+      financialRequest.departmentId.toString() !== department._id.toString()
+    ) {
+      return res.status(403).json({
+        message:
+          "You are not authorized to reject requests from this department",
+      });
+    }
+
+    const approval = await Approval.create({
+      requestId: financialRequest._id,
+      reviewerId: userId,
+      level: 1,
+      decision: "REJECTED",
+      remarks,
+      decidedAt: new Date(),
+    });
+
+    financialRequest.status = "REJECTED";
+    await financialRequest.save();
+
+    return res.status(200).json({
+      message: "Financial request rejected successfully",
+      financialRequest,
+      approval,
+    });
+  } catch (error) {
+    console.error("Reject financial request error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
