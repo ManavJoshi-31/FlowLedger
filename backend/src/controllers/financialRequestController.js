@@ -1,6 +1,8 @@
 import FinancialRequest from "../models/FinancialRequest.js";
 import Budget from "../models/Budget.js";
 import User from "../models/User.js";
+import Department from "../models/Department.js";
+
 export const createFinancialRequest = async (req, res) => {
   try {
     const { budgetId, title, description, amount, category } = req.body;
@@ -103,6 +105,40 @@ export const createFinancialRequest = async (req, res) => {
     });
   } catch (error) {
     console.error("Create financial request error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+export const getPendingRequests = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const organizationId = req.user.organizationId;
+
+    const department = await Department.findOne({
+      managerId: userId,
+      organizationId,
+    });
+
+    if (!department) {
+      return res.status(400).json({
+        message: "Department Manager is not assigned to a department",
+      });
+    }
+
+    const requests = await FinancialRequest.find({
+      organizationId,
+      departmentId: department._id,
+      status: "PENDING",
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Pending financial requests fetched successfully",
+      requests,
+    });
+  } catch (error) {
+    console.error("Get pending requests error:", error.message);
 
     return res.status(500).json({
       message: "Internal server error",
