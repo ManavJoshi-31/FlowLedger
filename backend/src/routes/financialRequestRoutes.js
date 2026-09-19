@@ -3,6 +3,7 @@ import express from "express";
 import {
   createFinancialRequest,
   getPendingRequests,
+  approveFinancialRequest,
 } from "../controllers/financialRequestController.js";
 
 import { authenticate, authorizeRole } from "../auth/authMiddleware.js";
@@ -23,4 +24,10 @@ router.get(
   getPendingRequests,
 );
 
+router.patch(
+  "/:requestId/approve",
+  authenticate,
+  authorizeRole("DEPARTMENT_MANAGER"),
+  approveFinancialRequest,
+);
 export default router;

@@ -2,6 +2,7 @@ import FinancialRequest from "../models/FinancialRequest.js";
 import Budget from "../models/Budget.js";
 import User from "../models/User.js";
 import Department from "../models/Department.js";
+import Approval from "../models/Approval.js";
 
 export const createFinancialRequest = async (req, res) => {
   try {
@@ -139,6 +140,88 @@ export const getPendingRequests = async (req, res) => {
     });
   } catch (error) {
     console.error("Get pending requests error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+export const approveFinancialRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { remarks } = req.body;
+
+    const userId = req.user.userId;
+    const organizationId = req.user.organizationId;
+
+    // Find the request
+    const financialRequest = await FinancialRequest.findById(requestId);
+
+    if (!financialRequest) {
+      return res.status(404).json({
+        message: "Financial request not found",
+      });
+    }
+
+    // Make sure the request belongs to the manager's organization
+    if (
+      financialRequest.organizationId.toString() !== organizationId.toString()
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to approve this request",
+      });
+    }
+
+    // Request must currently be pending
+    if (financialRequest.status !== "PENDING") {
+      return res.status(400).json({
+        message: "Only pending requests can be approved",
+      });
+    }
+
+    // Find the department managed by the authenticated user
+    const department = await Department.findOne({
+      managerId: userId,
+      organizationId,
+    });
+
+    if (!department) {
+      return res.status(400).json({
+        message: "Department Manager is not assigned to a department",
+      });
+    }
+
+    // Make sure the request belongs to the manager's department
+    if (
+      financialRequest.departmentId.toString() !== department._id.toString()
+    ) {
+      return res.status(403).json({
+        message:
+          "You are not authorized to approve requests from this department",
+      });
+    }
+
+    // Create approval record
+    const approval = await Approval.create({
+      requestId: financialRequest._id,
+      reviewerId: userId,
+      level: 1,
+      decision: "APPROVED",
+      remarks,
+      decidedAt: new Date(),
+    });
+
+    // Update request status
+    financialRequest.status = "APPROVED";
+    await financialRequest.save();
+
+    return res.status(200).json({
+      message: "Financial request approved successfully",
+      financialRequest,
+      approval,
+    });
+  } catch (error) {
+    console.error("Approve financial request error:", error.message);
 
     return res.status(500).json({
       message: "Internal server error",
