@@ -3,7 +3,7 @@ import Budget from "../models/Budget.js";
 import User from "../models/User.js";
 import Department from "../models/Department.js";
 import Approval from "../models/Approval.js";
-
+import { notifyRequestSubmitted } from "../services/notificationService.js";
 export const createFinancialRequest = async (req, res) => {
   try {
     const { budgetId, title, description, amount, category } = req.body;
@@ -96,6 +96,10 @@ export const createFinancialRequest = async (req, res) => {
       status,
       submittedAt: status === "PENDING" ? new Date() : undefined,
     });
+
+    if (status === "PENDING") {
+      await notifyRequestSubmitted(financialRequest);
+    }
 
     return res.status(201).json({
       message:
