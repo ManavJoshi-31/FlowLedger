@@ -3,7 +3,10 @@ import Budget from "../models/Budget.js";
 import User from "../models/User.js";
 import Department from "../models/Department.js";
 import Approval from "../models/Approval.js";
-import { notifyRequestSubmitted } from "../services/notificationService.js";
+import {
+  notifyRequestSubmitted,
+  notifyRequestApproved,
+} from "../services/notificationService.js";
 export const createFinancialRequest = async (req, res) => {
   try {
     const { budgetId, title, description, amount, category } = req.body;
@@ -218,6 +221,7 @@ export const approveFinancialRequest = async (req, res) => {
     // Update request status
     financialRequest.status = "APPROVED";
     await financialRequest.save();
+    await notifyRequestApproved(financialRequest);
 
     return res.status(200).json({
       message: "Financial request approved successfully",

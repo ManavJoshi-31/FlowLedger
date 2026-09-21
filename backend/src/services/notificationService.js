@@ -21,3 +21,15 @@ export const notifyRequestSubmitted = async (financialRequest) => {
 
   return notification;
 };
+export const notifyRequestApproved = async (financialRequest) => {
+  const notification = await Notification.create({
+    userId: financialRequest.requestedBy,
+    type: "REQUEST_APPROVED",
+    title: "Financial Request Approved",
+    message: `Your financial request "${financialRequest.title}" has been approved.`,
+    requestId: financialRequest._id,
+    isRead: false,
+  });
+
+  return notification;
+};
