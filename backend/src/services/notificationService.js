@@ -33,3 +33,15 @@ export const notifyRequestApproved = async (financialRequest) => {
 
   return notification;
 };
+export const notifyRequestRejected = async (financialRequest) => {
+  const notification = await Notification.create({
+    userId: financialRequest.requestedBy,
+    type: "REQUEST_REJECTED",
+    title: "Financial Request Rejected",
+    message: `Your financial request "${financialRequest.title}" has been rejected.`,
+    requestId: financialRequest._id,
+    isRead: false,
+  });
+
+  return notification;
+};

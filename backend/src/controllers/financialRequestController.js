@@ -6,6 +6,7 @@ import Approval from "../models/Approval.js";
 import {
   notifyRequestSubmitted,
   notifyRequestApproved,
+  notifyRequestRejected,
 } from "../services/notificationService.js";
 export const createFinancialRequest = async (req, res) => {
   try {
@@ -297,6 +298,8 @@ export const rejectFinancialRequest = async (req, res) => {
 
     financialRequest.status = "REJECTED";
     await financialRequest.save();
+
+    await notifyRequestRejected(financialRequest);
 
     return res.status(200).json({
       message: "Financial request rejected successfully",
