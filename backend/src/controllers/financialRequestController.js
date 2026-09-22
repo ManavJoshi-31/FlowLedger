@@ -8,6 +8,7 @@ import {
   notifyRequestApproved,
   notifyRequestRejected,
 } from "../services/notificationService.js";
+import { createAuditLog } from "../services/auditLogService.js";
 export const createFinancialRequest = async (req, res) => {
   try {
     const { budgetId, title, description, amount, category } = req.body;
@@ -103,6 +104,21 @@ export const createFinancialRequest = async (req, res) => {
 
     if (status === "PENDING") {
       await notifyRequestSubmitted(financialRequest);
+
+      await createAuditLog({
+        userId: user._id,
+        organizationId: user.organizationId,
+        action: "FINANCIAL_REQUEST_CREATED",
+        entityType: "FINANCIAL_REQUEST",
+        entityId: financialRequest._id,
+        details: {
+          title: financialRequest.title,
+          amount: financialRequest.amount,
+          category: financialRequest.category,
+          status: financialRequest.status,
+        },
+        ipAddress: req.ip,
+      });
     }
 
     return res.status(201).json({
