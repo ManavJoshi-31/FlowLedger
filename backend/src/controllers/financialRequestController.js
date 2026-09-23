@@ -238,6 +238,22 @@ export const approveFinancialRequest = async (req, res) => {
     // Update request status
     financialRequest.status = "APPROVED";
     await financialRequest.save();
+
+    await createAuditLog({
+      userId,
+      organizationId,
+      action: "FINANCIAL_REQUEST_APPROVED",
+      entityType: "FINANCIAL_REQUEST",
+      entityId: financialRequest._id,
+      details: {
+        title: financialRequest.title,
+        amount: financialRequest.amount,
+        decision: "APPROVED",
+        remarks,
+      },
+      ipAddress: req.ip,
+    });
+
     await notifyRequestApproved(financialRequest);
 
     return res.status(200).json({
