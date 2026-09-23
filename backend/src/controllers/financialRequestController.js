@@ -203,6 +203,21 @@ export const approveFinancialRequest = async (req, res) => {
       });
     }
 
+    // Find the authenticated manager
+    const manager = await User.findById(userId);
+
+    if (!manager) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (manager.status !== "ACTIVE") {
+      return res.status(403).json({
+        message: "Inactive users cannot approve financial requests",
+      });
+    }
+
     // Find the department managed by the authenticated user
     const department = await Department.findOne({
       managerId: userId,
@@ -299,6 +314,23 @@ export const rejectFinancialRequest = async (req, res) => {
       });
     }
 
+    // Find the authenticated manager
+    /* This change adds an extra layer of authorization security to the approval and rejection workflow. Previously, once a user had a valid JWT containing the DEPARTMENT_MANAGER role, the system checked whether that user managed the relevant department, but it did not verify the manager's current status in the database. Now, before approving or rejecting a request, the backend fetches the manager's user record and confirms that their status is ACTIVE. This means that if a manager is later deactivated after receiving a JWT, that manager cannot continue approving or rejecting financial requests with an old, still-valid token—the backend will return 403 Forbidden. In other words, the JWT establishes who the user is and what role they have, while the database check confirms that they are currently allowed to perform the operation. This gives FlowLedger stronger defense-in-depth and prevents deactivated managers from performing sensitive financial actions. */
+    const manager = await User.findById(userId);
+
+    if (!manager) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (manager.status !== "ACTIVE") {
+      return res.status(403).json({
+        message: "Inactive users cannot reject financial requests",
+      });
+    }
+
+    // Find the department managed by the authenticated user
     const department = await Department.findOne({
       managerId: userId,
       organizationId,
