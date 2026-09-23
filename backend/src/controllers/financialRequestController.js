@@ -331,6 +331,21 @@ export const rejectFinancialRequest = async (req, res) => {
     financialRequest.status = "REJECTED";
     await financialRequest.save();
 
+    await createAuditLog({
+      userId,
+      organizationId,
+      action: "FINANCIAL_REQUEST_REJECTED",
+      entityType: "FINANCIAL_REQUEST",
+      entityId: financialRequest._id,
+      details: {
+        title: financialRequest.title,
+        amount: financialRequest.amount,
+        decision: "REJECTED",
+        remarks,
+      },
+      ipAddress: req.ip,
+    });
+
     await notifyRequestRejected(financialRequest);
 
     return res.status(200).json({
