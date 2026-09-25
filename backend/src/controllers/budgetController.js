@@ -1,6 +1,7 @@
 import Budget from "../models/Budget.js";
 import Organization from "../models/Organization.js";
 import Department from "../models/Department.js";
+import mongoose from "mongoose";
 
 export const createBudget = async (req, res) => {
   try {
@@ -126,7 +127,11 @@ export const getBudgetById = async (req, res) => {
   try {
     const { budgetId } = req.params;
     const organizationId = req.user.organizationId;
-
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
+      return res.status(400).json({
+        message: "Invalid budget ID",
+      });
+    }
     const budget = await Budget.findById(budgetId);
 
     if (!budget) {
@@ -178,7 +183,11 @@ export const updateBudget = async (req, res) => {
   try {
     const { budgetId } = req.params;
     const { totalAmount, period } = req.body;
-
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
+      return res.status(400).json({
+        message: "Invalid budget ID",
+      });
+    }
     const organizationId = req.user.organizationId;
 
     const budget = await Budget.findById(budgetId);
@@ -261,7 +270,11 @@ export const closeBudget = async (req, res) => {
   try {
     const { budgetId } = req.params;
     const organizationId = req.user.organizationId;
-
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
+      return res.status(400).json({
+        message: "Invalid budget ID",
+      });
+    }
     const budget = await Budget.findById(budgetId);
 
     if (!budget) {

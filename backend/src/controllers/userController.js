@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Department from "../models/Department.js";
 import { hashPassword } from "../utils/password.js";
-
+import mongoose from "mongoose";
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role, departmentId } = req.body;
@@ -135,7 +135,11 @@ export const updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const { name, email, departmentId, status } = req.body;
-
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
     // 1. Find the user
     const user = await User.findById(userId);
 
