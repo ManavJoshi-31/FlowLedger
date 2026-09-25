@@ -49,9 +49,15 @@ export const createFinancialRequest = async (req, res) => {
     }
 
     // 5. Validate amount
-    if (Number(amount) <= 0) {
+    const numericAmount = Number(amount);
+
+    if (
+      !Number.isFinite(numericAmount) ||
+      numericAmount <= 0 ||
+      !Number.isInteger(numericAmount)
+    ) {
       return res.status(400).json({
-        message: "Request amount must be greater than zero",
+        message: "Request amount must be a positive whole number",
       });
     }
 
@@ -84,8 +90,10 @@ export const createFinancialRequest = async (req, res) => {
     // 10. Check budget availability
     const availableAmount =
       Number(budget.totalAmount) - Number(budget.usedAmount);
+
     let status = "PENDING";
-    if (Number(amount) > availableAmount) {
+
+    if (numericAmount > availableAmount) {
       status = "DRAFT";
     }
     // 11. Create financial request
@@ -314,8 +322,8 @@ export const rejectFinancialRequest = async (req, res) => {
       });
     }
 
-    // Find the authenticated manager
     /* This change adds an extra layer of authorization security to the approval and rejection workflow. Previously, once a user had a valid JWT containing the DEPARTMENT_MANAGER role, the system checked whether that user managed the relevant department, but it did not verify the manager's current status in the database. Now, before approving or rejecting a request, the backend fetches the manager's user record and confirms that their status is ACTIVE. This means that if a manager is later deactivated after receiving a JWT, that manager cannot continue approving or rejecting financial requests with an old, still-valid token—the backend will return 403 Forbidden. In other words, the JWT establishes who the user is and what role they have, while the database check confirms that they are currently allowed to perform the operation. This gives FlowLedger stronger defense-in-depth and prevents deactivated managers from performing sensitive financial actions. */
+    // Find the authenticated manager
     const manager = await User.findById(userId);
 
     if (!manager) {
