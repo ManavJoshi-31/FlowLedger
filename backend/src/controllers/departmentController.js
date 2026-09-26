@@ -157,6 +157,7 @@ export const updateDepartment = async (req, res) => {
       // Manager cannot already manage another department
       const managedDepartment = await Department.findOne({
         managerId,
+        organizationId: req.user.organizationId,
         _id: { $ne: departmentId },
       });
 

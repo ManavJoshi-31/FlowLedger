@@ -111,22 +111,33 @@ export const createFinancialRequest = async (req, res) => {
     });
 
     if (status === "PENDING") {
-      await notifyRequestSubmitted(financialRequest);
+      try {
+        await notifyRequestSubmitted(financialRequest);
+      } catch (error) {
+        console.error("Request submission notification failed:", error.message);
+      }
 
-      await createAuditLog({
-        userId: user._id,
-        organizationId: user.organizationId,
-        action: "FINANCIAL_REQUEST_CREATED",
-        entityType: "FINANCIAL_REQUEST",
-        entityId: financialRequest._id,
-        details: {
-          title: financialRequest.title,
-          amount: financialRequest.amount,
-          category: financialRequest.category,
-          status: financialRequest.status,
-        },
-        ipAddress: req.ip,
-      });
+      try {
+        await createAuditLog({
+          userId: user._id,
+          organizationId: user.organizationId,
+          action: "FINANCIAL_REQUEST_CREATED",
+          entityType: "FINANCIAL_REQUEST",
+          entityId: financialRequest._id,
+          details: {
+            title: financialRequest.title,
+            amount: financialRequest.amount,
+            category: financialRequest.category,
+            status: financialRequest.status,
+          },
+          ipAddress: req.ip,
+        });
+      } catch (error) {
+        console.error(
+          "Audit log creation failed after request creation:",
+          error.message,
+        );
+      }
     }
 
     return res.status(201).json({
@@ -262,22 +273,30 @@ export const approveFinancialRequest = async (req, res) => {
     financialRequest.status = "APPROVED";
     await financialRequest.save();
 
-    await createAuditLog({
-      userId,
-      organizationId,
-      action: "FINANCIAL_REQUEST_APPROVED",
-      entityType: "FINANCIAL_REQUEST",
-      entityId: financialRequest._id,
-      details: {
-        title: financialRequest.title,
-        amount: financialRequest.amount,
-        decision: "APPROVED",
-        remarks,
-      },
-      ipAddress: req.ip,
-    });
+    try {
+      await createAuditLog({
+        userId,
+        organizationId,
+        action: "FINANCIAL_REQUEST_APPROVED",
+        entityType: "FINANCIAL_REQUEST",
+        entityId: financialRequest._id,
+        details: {
+          title: financialRequest.title,
+          amount: financialRequest.amount,
+          decision: "APPROVED",
+          remarks,
+        },
+        ipAddress: req.ip,
+      });
+    } catch (error) {
+      console.error("Audit log creation failed after approval:", error.message);
+    }
 
-    await notifyRequestApproved(financialRequest);
+    try {
+      await notifyRequestApproved(financialRequest);
+    } catch (error) {
+      console.error("Approval notification failed:", error.message);
+    }
 
     return res.status(200).json({
       message: "Financial request approved successfully",
@@ -371,22 +390,33 @@ export const rejectFinancialRequest = async (req, res) => {
     financialRequest.status = "REJECTED";
     await financialRequest.save();
 
-    await createAuditLog({
-      userId,
-      organizationId,
-      action: "FINANCIAL_REQUEST_REJECTED",
-      entityType: "FINANCIAL_REQUEST",
-      entityId: financialRequest._id,
-      details: {
-        title: financialRequest.title,
-        amount: financialRequest.amount,
-        decision: "REJECTED",
-        remarks,
-      },
-      ipAddress: req.ip,
-    });
+    try {
+      await createAuditLog({
+        userId,
+        organizationId,
+        action: "FINANCIAL_REQUEST_REJECTED",
+        entityType: "FINANCIAL_REQUEST",
+        entityId: financialRequest._id,
+        details: {
+          title: financialRequest.title,
+          amount: financialRequest.amount,
+          decision: "REJECTED",
+          remarks,
+        },
+        ipAddress: req.ip,
+      });
+    } catch (error) {
+      console.error(
+        "Audit log creation failed after rejection:",
+        error.message,
+      );
+    }
 
-    await notifyRequestRejected(financialRequest);
+    try {
+      await notifyRequestRejected(financialRequest);
+    } catch (error) {
+      console.error("Rejection notification failed:", error.message);
+    }
 
     return res.status(200).json({
       message: "Financial request rejected successfully",
