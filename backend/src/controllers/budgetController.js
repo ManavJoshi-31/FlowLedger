@@ -216,7 +216,11 @@ export const updateBudget = async (req, res) => {
           message: "Total amount cannot be negative",
         });
       }
-
+      if (Number(totalAmount) < Number(budget.usedAmount)) {
+        return res.status(400).json({
+          message: "Total amount cannot be less than used amount",
+        });
+      }
       budget.totalAmount = totalAmount;
     }
 
