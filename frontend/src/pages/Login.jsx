@@ -1,16 +1,27 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import AuthContext from '../context/AuthContext'
 
 function Login() {
+
+  // "Give me the value currently provided by AuthContext, and extract its login property."
+  const { login } = useContext(AuthContext)
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    console.log({
-      email,
-      password,
-    })
+    try {
+      const data = await login(email, password)
+
+      console.log('Login successful:', data)
+    } catch (error) {
+      console.error(
+        'Login failed:',
+        error.response?.data?.message
+      )
+    }
   }
 
   return (
@@ -20,6 +31,7 @@ function Login() {
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">Email</label>
+
           <input
             id="email"
             type="email"
@@ -30,6 +42,7 @@ function Login() {
 
         <div>
           <label htmlFor="password">Password</label>
+
           <input
             id="password"
             type="password"
