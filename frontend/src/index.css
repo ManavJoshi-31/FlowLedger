@@ -1,18 +1,22 @@
 :root {
-  --color-mint: #d4ecdd;
+  --color-ink: #0e1525;
+  --color-slate: #27344b;
   --color-teal: #345b63;
-  --color-deep-teal: #152d35;
-  --color-navy: #112031;
+  --color-steel: #6b7a90;
+  --color-seafoam: #7fb7ae;
+  --color-mint: #d4ecdd;
+  --color-ivory: #fbfaf7;
+  --color-cobalt: #3b5bdb;
+  --color-copper: #c6773e;
 
-  --color-background: #f8faf7;
   --color-surface: #ffffff;
-  --color-border: #d4ecdd;
+  --color-border: #e4e8e5;
 
   --font-primary: 'Playfair Display', serif;
 
   font-family: var(--font-primary);
-  color: var(--color-navy);
-  background: var(--color-background);
+  color: var(--color-ink);
+  background-color: var(--color-ivory);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,8 +32,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-}
 
+  background-color: var(--color-ivory);
+}
 button,
 input,
 textarea,
