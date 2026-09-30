@@ -1,0 +1,43 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 1rem 3rem;
+
+  background-color: var(--color-ink);
+  color: var(--color-seafoam);
+}
+
+.navbar-brand {
+  margin: 0;
+
+  color: var(--color-mint);
+
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-link {
+  color: var(--color-seafoam);
+  text-decoration: none;
+
+  font-size: 1rem;
+  font-weight: 500;
+
+  transition: color 0.2s ease;
+}
+
+.navbar-link:hover {
+  color: var(--color-mint);
+}
+
+.navbar-link.active {
+  color: var(--color-mint);
+}
