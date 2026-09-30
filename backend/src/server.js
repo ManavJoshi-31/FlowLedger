@@ -9,6 +9,7 @@ import budgetRoutes from "./routes/budgetRoutes.js";
 import financialRequestRoutes from "./routes/financialRequestRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import cors from "cors";
 
 const app = express();
 
@@ -16,6 +17,7 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/organizations", organizationRoutes);
