@@ -4,6 +4,7 @@ import { getDashboardNotifications } from "../services/dashboardService";
 import NotificationItem from "../components/NotificationItem";
 import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
+import { getFinancialRequests } from "../services/financialRequestService";
 function Dashboard() {
   //→ actual data returned by backend
   const [notifications, setNotifications] = useState([]);
@@ -14,23 +15,37 @@ function Dashboard() {
   //→ error message we want to show to the user
   const [error, setError] = useState("");
 
+  const [budgets, setBudgets] = useState([]);
+  const [budgetsLoading, setBudgetsLoading] = useState(true);
+  const [budgetsError, setBudgetsError] = useState("");
+
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState("");
+
+  const pendingRequests = requests.filter(
+    (request) => request.status === "PENDING",
+  ).length;
+
+  const approvedRequests = requests.filter(
+    (request) => request.status === "APPROVED",
+  ).length;
+
   const cards = [
     {
       title: "Pending Requests",
-      value: 5,
+      value: pendingRequests,
     },
     {
       title: "Approved Requests",
-      value: 12,
+      value: approvedRequests,
     },
     {
       title: "Available Budget",
       value: "₹4,50,000",
     },
   ];
-  const [budgets, setBudgets] = useState([]);
-  const [budgetsLoading, setBudgetsLoading] = useState(true);
-  const [budgetsError, setBudgetsError] = useState("");
+
   useEffect(() => {
     const fetchBudgets = async () => {
       try {
@@ -73,6 +88,26 @@ function Dashboard() {
     fetchNotifications();
   }, []);
 
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        setRequestsLoading(true);
+        setRequestsError("");
+
+        const data = await getFinancialRequests();
+
+        setRequests(data.requests);
+      } catch (error) {
+        setRequestsError(
+          error.response?.data?.message || "Failed to load financial requests",
+        );
+      } finally {
+        setRequestsLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
   return (
     <main>
       <h1>Dashboard</h1>
