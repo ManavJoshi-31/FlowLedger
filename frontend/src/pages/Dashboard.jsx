@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
 import { getDashboardNotifications } from "../services/dashboardService";
 import NotificationItem from "../components/NotificationItem";
-
+import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
 function Dashboard() {
   //→ actual data returned by backend
@@ -109,11 +109,7 @@ function Dashboard() {
             <p>No budgets found.</p>
           ) : (
             budgets.map((budget) => (
-              <div key={budget._id}>
-                <p>Total: ₹{budget.totalAmount}</p>
-                <p>Used: ₹{budget.usedAmount}</p>
-                <p>Status: {budget.status}</p>
-              </div>
+              <BudgetCard key={budget._id} budget={budget} />
             ))
           )}
         </section>
