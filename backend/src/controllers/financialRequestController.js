@@ -189,6 +189,78 @@ export const getPendingRequests = async (req, res) => {
     });
   }
 };
+export const getFinancialRequests = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const organizationId = req.user.organizationId;
+    const role = req.user.role;
+
+    // 1. Find the authenticated user from the database
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // 2. User must currently be active
+    if (user.status !== "ACTIVE") {
+      return res.status(403).json({
+        message: "Inactive users cannot access financial requests",
+      });
+    }
+
+    // 3. Start with organization isolation
+    // Every request returned must belong to the user's organization.
+    let filter = {
+      organizationId,
+    };
+
+    // 4. Employee isolation
+    // Employees can only see requests created by themselves.
+    if (role === "EMPLOYEE") {
+      filter.requestedBy = userId;
+    }
+
+    // 5. Department Manager isolation
+    // Manager can only see requests from their currently managed department.
+    if (role === "DEPARTMENT_MANAGER") {
+      const department = await Department.findOne({
+        managerId: userId,
+        organizationId,
+      });
+
+      if (!department) {
+        return res.status(400).json({
+          message: "Department Manager is not assigned to a department",
+        });
+      }
+
+      filter.departmentId = department._id;
+    }
+
+    // 6. Organization Admin
+    // No additional filter is required.
+    // organizationId already restricts results to their organization.
+
+    // 7. Fetch only requests within the authorized scope
+    const requests = await FinancialRequest.find(filter).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      message: "Financial requests fetched successfully",
+      requests,
+    });
+  } catch (error) {
+    console.error("Get financial requests error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 export const approveFinancialRequest = async (req, res) => {
   try {
     const { requestId } = req.params;

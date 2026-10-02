@@ -5,6 +5,7 @@ import {
   getPendingRequests,
   approveFinancialRequest,
   rejectFinancialRequest,
+  getFinancialRequests,
 } from "../controllers/financialRequestController.js";
 
 import { authenticate, authorizeRole } from "../auth/authMiddleware.js";
@@ -17,7 +18,12 @@ router.post(
   authorizeRole("EMPLOYEE"),
   createFinancialRequest,
 );
-
+router.get(
+  "/",
+  authenticate,
+  authorizeRole("EMPLOYEE", "DEPARTMENT_MANAGER", "ORGANIZATION_ADMIN"),
+  getFinancialRequests,
+);
 router.get(
   "/pending",
   authenticate,
