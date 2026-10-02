@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
 import { getDashboardNotifications } from "../services/dashboardService";
+import NotificationItem from "../components/NotificationItem";
 
+import { getBudgets } from "../services/budgetService";
 function Dashboard() {
   //→ actual data returned by backend
-
   const [notifications, setNotifications] = useState([]);
 
   //→ whether the request is currently running
-
   const [loading, setLoading] = useState(true);
 
   //→ error message we want to show to the user
   const [error, setError] = useState("");
+
   const cards = [
     {
       title: "Pending Requests",
@@ -27,6 +28,29 @@ function Dashboard() {
       value: "₹4,50,000",
     },
   ];
+  const [budgets, setBudgets] = useState([]);
+  const [budgetsLoading, setBudgetsLoading] = useState(true);
+  const [budgetsError, setBudgetsError] = useState("");
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      try {
+        setBudgetsLoading(true);
+        setBudgetsError("");
+
+        const data = await getBudgets();
+
+        setBudgets(data.budgets);
+      } catch (error) {
+        setBudgetsError(
+          error.response?.data?.message || "Failed to load budgets",
+        );
+      } finally {
+        setBudgetsLoading(false);
+      }
+    };
+
+    fetchBudgets();
+  }, []);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -57,11 +81,43 @@ function Dashboard() {
 
       {error && <p>{error}</p>}
 
-      {!loading && !error && <p>Notifications: {notifications.length}</p>}
+      {!loading && !error && (
+        <section>
+          <h2>Notifications</h2>
 
-      {cards.map((card) => (
-        <DashboardCard key={card.title} title={card.title} value={card.value} />
-      ))}
+          {notifications.length === 0 ? (
+            <p>No notifications yet.</p>
+          ) : (
+            notifications.map((notification) => (
+              <NotificationItem
+                key={notification._id}
+                notification={notification}
+              />
+            ))
+          )}
+        </section>
+      )}
+      {budgetsLoading && <p>Loading budgets...</p>}
+
+      {budgetsError && <p>{budgetsError}</p>}
+
+      {!budgetsLoading && !budgetsError && (
+        <section>
+          <h2>Budgets</h2>
+
+          {budgets.length === 0 ? (
+            <p>No budgets found.</p>
+          ) : (
+            budgets.map((budget) => (
+              <div key={budget._id}>
+                <p>Total: ₹{budget.totalAmount}</p>
+                <p>Used: ₹{budget.usedAmount}</p>
+                <p>Status: {budget.status}</p>
+              </div>
+            ))
+          )}
+        </section>
+      )}
     </main>
   );
 }
