@@ -12,3 +12,6 @@ coverage/
 
 .DS_Store
 Thumbs.db
+
+# Local dev docs — not tracked
+docs/
