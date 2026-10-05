@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
-import { getDashboardNotifications } from "../services/dashboardService";
+import {
+  getDashboardNotifications,
+  markNotificationAsRead,
+} from "../services/dashboardService";
 import NotificationItem from "../components/NotificationItem";
 import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
@@ -22,7 +25,27 @@ function Dashboard() {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
+  const handleMarkNotificationAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
 
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) =>
+          notification._id === notificationId
+            ? {
+                ...notification,
+                isRead: true,
+              }
+            : notification,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Failed to mark notification as read:",
+        error.response?.data?.message,
+      );
+    }
+  };
   const pendingRequests = requests.filter(
     (request) => request.status === "PENDING",
   ).length;
@@ -30,7 +53,11 @@ function Dashboard() {
   const approvedRequests = requests.filter(
     (request) => request.status === "APPROVED",
   ).length;
-
+  const availableBudget = budgets.reduce(
+    (total, budget) =>
+      total + (Number(budget.totalAmount) - Number(budget.usedAmount)),
+    0,
+  );
   const cards = [
     {
       title: "Pending Requests",
@@ -42,7 +69,7 @@ function Dashboard() {
     },
     {
       title: "Available Budget",
-      value: "₹4,50,000",
+      value: `₹${availableBudget.toLocaleString("en-IN")}`,
     },
   ];
 
@@ -108,10 +135,30 @@ function Dashboard() {
 
     fetchRequests();
   }, []);
+
   return (
     <main>
       <h1>Dashboard</h1>
+      {requestsLoading && <p>Loading request statistics...</p>}
 
+      {requestsError && <p>{requestsError}</p>}
+
+      {!requestsLoading &&
+        !requestsError &&
+        !budgetsLoading &&
+        !budgetsError && (
+          <section>
+            <h2>Overview</h2>
+
+            {cards.map((card) => (
+              <DashboardCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
+              />
+            ))}
+          </section>
+        )}
       {loading && <p>Loading notifications...</p>}
 
       {error && <p>{error}</p>}
@@ -127,6 +174,7 @@ function Dashboard() {
               <NotificationItem
                 key={notification._id}
                 notification={notification}
+                onMarkAsRead={handleMarkNotificationAsRead}
               />
             ))
           )}
