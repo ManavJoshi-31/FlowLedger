@@ -4,11 +4,11 @@ import User from "../models/User.js";
 
 export const createDepartment = async (req, res) => {
   try {
-    const { organizationId, name, description, managerId } = req.body;
-
-    if (!organizationId || !name || !managerId) {
+    const { name, description, managerId } = req.body;
+    const organizationId = req.user.organizationId;
+    if (!name || !managerId) {
       return res.status(400).json({
-        message: "Organization ID,department name and Manager ID are required",
+        message: "Department name and Manager ID are required",
       });
     }
 
