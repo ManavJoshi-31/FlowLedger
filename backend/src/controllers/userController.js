@@ -294,3 +294,53 @@ export const getDepartmentManagers = async (req, res) => {
     });
   }
 };
+export const getUsers = async (req, res) => {
+  try {
+    const { organizationId, role, userId } = req.user;
+
+    const query = {
+      organizationId,
+    };
+
+    if (role === "DEPARTMENT_MANAGER") {
+      const manager = await User.findOne({
+        _id: userId,
+        organizationId,
+        role: "DEPARTMENT_MANAGER",
+        status: "ACTIVE",
+      }).select("departmentId");
+
+      if (!manager) {
+        return res.status(404).json({
+          message: "Department Manager not found",
+        });
+      }
+
+      if (!manager.departmentId) {
+        return res.status(400).json({
+          message: "Department Manager is not assigned to a department",
+        });
+      }
+
+      query.role = "EMPLOYEE";
+      query.departmentId = manager.departmentId;
+    }
+
+    const users = await User.find(query)
+      .select("_id name email role departmentId status")
+      .sort({
+        name: 1,
+      });
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      users,
+    });
+  } catch (error) {
+    console.error("Get users error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

@@ -4,6 +4,7 @@ import {
   createUser,
   updateUser,
   getDepartmentManagers,
+  getUsers,
 } from "../controllers/userController.js";
 import { authenticate, authorizeRole } from "../auth/authMiddleware.js";
 
@@ -21,6 +22,12 @@ router.get(
   authenticate,
   authorizeRole("ORGANIZATION_ADMIN"),
   getDepartmentManagers,
+);
+router.get(
+  "/",
+  authenticate,
+  authorizeRole("ORGANIZATION_ADMIN", "DEPARTMENT_MANAGER"),
+  getUsers,
 );
 router.patch(
   "/:userId",
