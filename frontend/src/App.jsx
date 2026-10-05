@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Budgets from "./pages/Budgets";
 import CreateFinancialRequest from "./pages/CreateFinancialRequest";
+
 function App() {
   return (
     <BrowserRouter>
@@ -15,10 +16,31 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/budgets" element={<Budgets />} />
 
-            <Route path="/requests/new" element={<CreateFinancialRequest />} />
+            {/* Budget viewing */}
+            <Route
+              element={
+                <ProtectedRoute
+                  allowedRoles={[
+                    "DEPARTMENT_MANAGER",
+                    "FINANCE_MANAGER",
+                    "ORGANIZATION_ADMIN",
+                  ]}
+                />
+              }
+            >
+              <Route path="/budgets" element={<Budgets />} />
+            </Route>
 
+            {/* Employee request creation */}
+            <Route element={<ProtectedRoute allowedRoles={["EMPLOYEE"]} />}>
+              <Route
+                path="/requests/new"
+                element={<CreateFinancialRequest />}
+              />
+            </Route>
+
+            {/* Budget creation */}
             <Route
               element={
                 <ProtectedRoute
