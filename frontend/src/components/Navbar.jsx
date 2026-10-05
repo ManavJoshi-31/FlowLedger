@@ -6,6 +6,9 @@ import "./Navbar.css";
 function Navbar() {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
 
+  const canCreateBudget =
+    user?.role === "FINANCE_MANAGER" || user?.role === "ORGANIZATION_ADMIN";
+
   const canViewBudgets =
     user?.role === "DEPARTMENT_MANAGER" ||
     user?.role === "FINANCE_MANAGER" ||
@@ -61,7 +64,16 @@ function Navbar() {
                 Budgets
               </NavLink>
             )}
-
+            {canCreateBudget && (
+              <NavLink
+                to="/budgets/new"
+                className={({ isActive }) =>
+                  isActive ? "navbar-link active" : "navbar-link"
+                }
+              >
+                Create Budget
+              </NavLink>
+            )}
             <button type="button" className="navbar-link" onClick={logout}>
               Logout
             </button>
