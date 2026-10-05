@@ -8,6 +8,7 @@ import NotificationItem from "../components/NotificationItem";
 import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
 import { getFinancialRequests } from "../services/financialRequestService";
+import FinancialRequestList from "../components/FinancialRequestList";
 function Dashboard() {
   //→ actual data returned by backend
   const [notifications, setNotifications] = useState([]);
@@ -159,6 +160,17 @@ function Dashboard() {
             ))}
           </section>
         )}
+      {requestsLoading && <p>Loading financial requests...</p>}
+
+      {requestsError && <p>{requestsError}</p>}
+
+      {!requestsLoading && !requestsError && (
+        <section>
+          <h2>Financial Requests</h2>
+
+          <FinancialRequestList requests={requests} />
+        </section>
+      )}
       {loading && <p>Loading notifications...</p>}
 
       {error && <p>{error}</p>}
