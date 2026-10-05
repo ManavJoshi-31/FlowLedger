@@ -14,3 +14,8 @@ export const getBudgets = async () => {
     budgets,
   };
 };
+export const createBudget = async (budgetData) => {
+  const response = await api.post("/budgets", budgetData);
+
+  return response.data;
+};
