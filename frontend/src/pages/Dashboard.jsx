@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import AuthContext from "../context/AuthContext";
 import DashboardCard from "../components/DashboardCard";
 import {
   getDashboardNotifications,
@@ -9,14 +10,17 @@ import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
 import { getFinancialRequests } from "../services/financialRequestService";
 import FinancialRequestList from "../components/FinancialRequestList";
+
 function Dashboard() {
-  //→ actual data returned by backend
+  const { user } = useContext(AuthContext);
+
+  // → actual data returned by backend
   const [notifications, setNotifications] = useState([]);
 
-  //→ whether the request is currently running
+  // → whether the request is currently running
   const [loading, setLoading] = useState(true);
 
-  //→ error message we want to show to the user
+  // → error message we want to show to the user
   const [error, setError] = useState("");
 
   const [budgets, setBudgets] = useState([]);
@@ -26,6 +30,12 @@ function Dashboard() {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
+
+  const canViewBudgets =
+    user?.role === "DEPARTMENT_MANAGER" ||
+    user?.role === "FINANCE_MANAGER" ||
+    user?.role === "ORGANIZATION_ADMIN";
+
   const handleMarkNotificationAsRead = async (notificationId) => {
     try {
       await markNotificationAsRead(notificationId);
@@ -47,6 +57,7 @@ function Dashboard() {
       );
     }
   };
+
   const pendingRequests = requests.filter(
     (request) => request.status === "PENDING",
   ).length;
@@ -54,11 +65,13 @@ function Dashboard() {
   const approvedRequests = requests.filter(
     (request) => request.status === "APPROVED",
   ).length;
+
   const availableBudget = budgets.reduce(
     (total, budget) =>
       total + (Number(budget.totalAmount) - Number(budget.usedAmount)),
     0,
   );
+
   const cards = [
     {
       title: "Pending Requests",
@@ -68,13 +81,22 @@ function Dashboard() {
       title: "Approved Requests",
       value: approvedRequests,
     },
-    {
-      title: "Available Budget",
-      value: `₹${availableBudget.toLocaleString("en-IN")}`,
-    },
   ];
 
+  if (canViewBudgets) {
+    cards.push({
+      title: "Available Budget",
+      value: `₹${availableBudget.toLocaleString("en-IN")}`,
+    });
+  }
+
   useEffect(() => {
+    if (!canViewBudgets) {
+      setBudgets([]);
+      setBudgetsLoading(false);
+      return;
+    }
+
     const fetchBudgets = async () => {
       try {
         setBudgetsLoading(true);
@@ -93,7 +115,7 @@ function Dashboard() {
     };
 
     fetchBudgets();
-  }, []);
+  }, [canViewBudgets]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -140,26 +162,25 @@ function Dashboard() {
   return (
     <main>
       <h1>Dashboard</h1>
+
       {requestsLoading && <p>Loading request statistics...</p>}
 
       {requestsError && <p>{requestsError}</p>}
 
-      {!requestsLoading &&
-        !requestsError &&
-        !budgetsLoading &&
-        !budgetsError && (
-          <section>
-            <h2>Overview</h2>
+      {!requestsLoading && !requestsError && (
+        <section>
+          <h2>Overview</h2>
 
-            {cards.map((card) => (
-              <DashboardCard
-                key={card.title}
-                title={card.title}
-                value={card.value}
-              />
-            ))}
-          </section>
-        )}
+          {cards.map((card) => (
+            <DashboardCard
+              key={card.title}
+              title={card.title}
+              value={card.value}
+            />
+          ))}
+        </section>
+      )}
+
       {requestsLoading && <p>Loading financial requests...</p>}
 
       {requestsError && <p>{requestsError}</p>}
@@ -171,6 +192,7 @@ function Dashboard() {
           <FinancialRequestList requests={requests} />
         </section>
       )}
+
       {loading && <p>Loading notifications...</p>}
 
       {error && <p>{error}</p>}
@@ -192,11 +214,12 @@ function Dashboard() {
           )}
         </section>
       )}
-      {budgetsLoading && <p>Loading budgets...</p>}
 
-      {budgetsError && <p>{budgetsError}</p>}
+      {canViewBudgets && budgetsLoading && <p>Loading budgets...</p>}
 
-      {!budgetsLoading && !budgetsError && (
+      {canViewBudgets && budgetsError && <p>{budgetsError}</p>}
+
+      {canViewBudgets && !budgetsLoading && !budgetsError && (
         <section>
           <h2>Budgets</h2>
 
