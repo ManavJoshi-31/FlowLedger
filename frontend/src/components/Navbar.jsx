@@ -1,10 +1,17 @@
-import { NavLink } from 'react-router-dom'
-import { useContext } from 'react'
-import AuthContext from '../context/AuthContext'
-import './Navbar.css'
+import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
+import "./Navbar.css";
 
 function Navbar() {
-  const { isAuthenticated, logout } = useContext(AuthContext)
+  const { user, isAuthenticated, logout } = useContext(AuthContext);
+
+  const canViewBudgets =
+    user?.role === "DEPARTMENT_MANAGER" ||
+    user?.role === "FINANCE_MANAGER" ||
+    user?.role === "ORGANIZATION_ADMIN";
+
+  const canCreateRequest = user?.role === "EMPLOYEE";
 
   return (
     <nav className="navbar">
@@ -15,7 +22,7 @@ function Navbar() {
           <NavLink
             to="/login"
             className={({ isActive }) =>
-              isActive ? 'navbar-link active' : 'navbar-link'
+              isActive ? "navbar-link active" : "navbar-link"
             }
           >
             Login
@@ -27,24 +34,42 @@ function Navbar() {
             <NavLink
               to="/dashboard"
               className={({ isActive }) =>
-                isActive ? 'navbar-link active' : 'navbar-link'
+                isActive ? "navbar-link active" : "navbar-link"
               }
             >
               Dashboard
             </NavLink>
 
-            <button
-              type="button"
-              className="navbar-link"
-              onClick={logout}
-            >
+            {canCreateRequest && (
+              <NavLink
+                to="/requests/new"
+                className={({ isActive }) =>
+                  isActive ? "navbar-link active" : "navbar-link"
+                }
+              >
+                Create Request
+              </NavLink>
+            )}
+
+            {canViewBudgets && (
+              <NavLink
+                to="/budgets"
+                className={({ isActive }) =>
+                  isActive ? "navbar-link active" : "navbar-link"
+                }
+              >
+                Budgets
+              </NavLink>
+            )}
+
+            <button type="button" className="navbar-link" onClick={logout}>
               Logout
             </button>
           </>
         )}
       </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
