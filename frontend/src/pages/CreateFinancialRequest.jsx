@@ -31,12 +31,53 @@ function CreateFinancialRequest() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    setError("");
+    setSuccess("");
+
+    if (!formData.budgetId) {
+      setError("Please select a budget.");
+      return;
+    }
+
+    if (!formData.title.trim()) {
+      setError("Please enter a request title.");
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      setError("Please enter a description.");
+      return;
+    }
+
+    const amount = Number(formData.amount);
+
+    if (!formData.amount) {
+      setError("Please enter a request amount.");
+      return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("Amount must be greater than zero.");
+      return;
+    }
+
+    if (!Number.isInteger(amount)) {
+      setError("Amount must be a whole number.");
+      return;
+    }
+
+    if (!formData.category) {
+      setError("Please select a category.");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      setError("");
-      setSuccess("");
 
-      const data = await createFinancialRequest(formData);
+      const data = await createFinancialRequest({
+        ...formData,
+        amount,
+      });
 
       setSuccess(data.message);
     } catch (error) {
@@ -77,6 +118,7 @@ function CreateFinancialRequest() {
         <p>Submit a request against an available department budget.</p>
 
         <form onSubmit={handleSubmit}>
+          {/* Budget */}
           <div className="form-field">
             <label htmlFor="budgetId">Budget</label>
 
@@ -93,11 +135,11 @@ function CreateFinancialRequest() {
 
               {budgets.map((budget) => (
                 <option key={budget._id} value={budget._id}>
-                  {new Date(budget.period.startDate).toLocaleDateString(
-                    "en-IN",
-                  )}{" "}
-                  –{" "}
-                  {new Date(budget.period.endDate).toLocaleDateString("en-IN")}
+                  {`Budget — ${new Date(
+                    budget.period.startDate,
+                  ).getFullYear()}–${new Date(
+                    budget.period.endDate,
+                  ).getFullYear()}`}
                 </option>
               ))}
             </select>
@@ -105,12 +147,82 @@ function CreateFinancialRequest() {
 
           {budgetsError && <p>{budgetsError}</p>}
 
+          {/* Request Title */}
+          <div className="form-field">
+            <label htmlFor="title">Request Title</label>
+
+            <input
+              id="title"
+              name="title"
+              type="text"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter request title"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="form-field">
+            <label htmlFor="description">Description</label>
+
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Explain why this request is needed"
+              rows="5"
+            />
+          </div>
+
+          {/* Amount */}
+          <div className="form-field">
+            <label htmlFor="amount">Amount (₹)</label>
+
+            <input
+              id="amount"
+              name="amount"
+              type="number"
+              min="1"
+              step="1"
+              value={formData.amount}
+              onChange={handleChange}
+              placeholder="Enter requested amount"
+            />
+          </div>
+
+          {/* Category */}
+          <div className="form-field">
+            <label htmlFor="category">Category</label>
+
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+            >
+              <option value="">Select a category</option>
+
+              <option value="PURCHASE">Purchase</option>
+
+              <option value="TRAVEL">Travel</option>
+
+              <option value="REIMBURSEMENT">Reimbursement</option>
+
+              <option value="TRAINING">Training</option>
+
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          {/* Submit */}
           <button type="submit" disabled={submitting}>
             {submitting ? "Submitting..." : "Submit Request"}
           </button>
         </form>
 
         {error && <p>{error}</p>}
+
         {success && <p>{success}</p>}
       </section>
     </main>
