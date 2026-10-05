@@ -13,3 +13,8 @@ export const getFinancialRequests = async () => {
     requests,
   };
 };
+export const createFinancialRequest = async (requestData) => {
+  const response = await api.post("/financial-requests", requestData);
+
+  return response.data;
+};
