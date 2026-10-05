@@ -11,23 +11,21 @@ import {
 import { createAuditLog } from "../services/auditLogService.js";
 export const createFinancialRequest = async (req, res) => {
   try {
-    const { budgetId, title, description, amount, category } = req.body;
+    const { title, description, amount, category } = req.body;
+
     const userId = req.user.userId;
     const organizationId = req.user.organizationId;
+
     // 1. Validate required fields
-    if (
-      !budgetId ||
-      !title ||
-      !description ||
-      amount === undefined ||
-      !category
-    ) {
+    if (!title || !description || amount === undefined || !category) {
       return res.status(400).json({
         message: "Required financial request fields are missing",
       });
     }
+
     // 2. Find authenticated user
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({
         message: "User not found",
@@ -61,19 +59,31 @@ export const createFinancialRequest = async (req, res) => {
       });
     }
 
-    // 6. Find budget
-    const budget = await Budget.findById(budgetId);
+    // 6. Find applicable budget for user's department
+    const currentDate = new Date();
+
+    const budget = await Budget.findOne({
+      organizationId,
+      departmentId: user.departmentId,
+      status: "ACTIVE",
+      "period.startDate": { $lte: currentDate },
+      "period.endDate": { $gte: currentDate },
+    });
+
     if (!budget) {
       return res.status(404).json({
-        message: "Budget not found",
+        message:
+          "No active budget is available for your department for the current period",
       });
     }
+
     // 7. Organization isolation
     if (budget.organizationId.toString() !== organizationId.toString()) {
       return res.status(403).json({
         message: "Budget does not belong to your organization",
       });
     }
+
     // 8. Budget must belong to user's department
     if (budget.departmentId.toString() !== user.departmentId.toString()) {
       return res.status(403).json({
@@ -87,6 +97,7 @@ export const createFinancialRequest = async (req, res) => {
         message: "Cannot create request against a closed budget",
       });
     }
+
     // 10. Check budget availability
     const availableAmount =
       Number(budget.totalAmount) - Number(budget.usedAmount);
@@ -96,12 +107,13 @@ export const createFinancialRequest = async (req, res) => {
     if (numericAmount > availableAmount) {
       status = "DRAFT";
     }
+
     // 11. Create financial request
     const financialRequest = await FinancialRequest.create({
       organizationId: user.organizationId,
       departmentId: user.departmentId,
       requestedBy: user._id,
-      budgetId,
+      budgetId: budget._id,
       title,
       description,
       amount,
