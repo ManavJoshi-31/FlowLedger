@@ -205,3 +205,25 @@ export const updateDepartment = async (req, res) => {
     });
   }
 };
+export const getDepartments = async (req, res) => {
+  try {
+    const organizationId = req.user.organizationId;
+
+    const departments = await Department.find({
+      organizationId,
+    }).sort({
+      name: 1,
+    });
+
+    return res.status(200).json({
+      message: "Departments fetched successfully",
+      departments,
+    });
+  } catch (error) {
+    console.error("Get departments error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
