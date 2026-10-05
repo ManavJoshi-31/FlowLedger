@@ -18,3 +18,18 @@ export const createFinancialRequest = async (requestData) => {
 
   return response.data;
 };
+export const approveFinancialRequest = async (requestId, remarks = "") => {
+  const response = await api.patch(`/financial-requests/${requestId}/approve`, {
+    remarks,
+  });
+
+  return response.data;
+};
+
+export const rejectFinancialRequest = async (requestId, remarks = "") => {
+  const response = await api.patch(`/financial-requests/${requestId}/reject`, {
+    remarks,
+  });
+
+  return response.data;
+};

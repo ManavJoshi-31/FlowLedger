@@ -1,6 +1,6 @@
 import FinancialRequestItem from "./FinancialRequestItem";
 
-function FinancialRequestList({ requests }) {
+function FinancialRequestList({ requests, onRequestUpdated }) {
   if (requests.length === 0) {
     return <p>No financial requests found.</p>;
   }
@@ -8,7 +8,11 @@ function FinancialRequestList({ requests }) {
   return (
     <div>
       {requests.map((request) => (
-        <FinancialRequestItem key={request._id} request={request} />
+        <FinancialRequestItem
+          key={request._id}
+          request={request}
+          onRequestUpdated={onRequestUpdated}
+        />
       ))}
     </div>
   );

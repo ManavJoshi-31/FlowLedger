@@ -35,7 +35,13 @@ function Dashboard() {
     user?.role === "DEPARTMENT_MANAGER" ||
     user?.role === "FINANCE_MANAGER" ||
     user?.role === "ORGANIZATION_ADMIN";
-
+  const handleRequestUpdated = (updatedRequest) => {
+    setRequests((currentRequests) =>
+      currentRequests.map((request) =>
+        request._id === updatedRequest._id ? updatedRequest : request,
+      ),
+    );
+  };
   const handleMarkNotificationAsRead = async (notificationId) => {
     try {
       await markNotificationAsRead(notificationId);
@@ -189,7 +195,10 @@ function Dashboard() {
         <section>
           <h2>Financial Requests</h2>
 
-          <FinancialRequestList requests={requests} />
+          <FinancialRequestList
+            requests={requests}
+            onRequestUpdated={handleRequestUpdated}
+          />
         </section>
       )}
 
