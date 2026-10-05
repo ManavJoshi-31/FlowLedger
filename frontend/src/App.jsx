@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Budgets from "./pages/Budgets";
 import CreateFinancialRequest from "./pages/CreateFinancialRequest";
-
+import DepartmentManagement from "./pages/DepartmentManagement";
 function App() {
   return (
     <BrowserRouter>
@@ -16,7 +16,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-
+            <Route
+              element={<ProtectedRoute allowedRoles={["ORGANIZATION_ADMIN"]} />}
+            >
+              <Route path="/departments" element={<DepartmentManagement />} />
+            </Route>
             {/* Budget viewing */}
             <Route
               element={

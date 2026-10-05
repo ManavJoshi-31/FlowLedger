@@ -5,3 +5,17 @@ export const getDepartments = async () => {
 
   return response.data;
 };
+export const createDepartment = async (departmentData) => {
+  const response = await api.post("/departments", departmentData);
+
+  return response.data;
+};
+
+export const updateDepartment = async (departmentId, departmentData) => {
+  const response = await api.patch(
+    `/departments/${departmentId}`,
+    departmentData,
+  );
+
+  return response.data;
+};
