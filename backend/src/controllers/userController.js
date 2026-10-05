@@ -272,3 +272,25 @@ export const updateUser = async (req, res) => {
     });
   }
 };
+export const getDepartmentManagers = async (req, res) => {
+  try {
+    const organizationId = req.user.organizationId;
+
+    const managers = await User.find({
+      organizationId,
+      role: "DEPARTMENT_MANAGER",
+      status: "ACTIVE",
+    }).select("_id name email");
+
+    return res.status(200).json({
+      message: "Department Managers fetched successfully",
+      managers,
+    });
+  } catch (error) {
+    console.error("Get department managers error:", error.message);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
