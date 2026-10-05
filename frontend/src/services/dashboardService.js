@@ -1,7 +1,14 @@
-import api from "./api";
+import api from './api'
 
 export const getDashboardNotifications = async () => {
-  const response = await api.get("/notifications");
+  const response = await api.get('/notifications')
+  return response.data
+}
 
-  return response.data;
-};
+export const markNotificationAsRead = async (notificationId) => {
+  const response = await api.patch(
+    `/notifications/${notificationId}/read`,
+  )
+
+  return response.data
+}
