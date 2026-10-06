@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUsers, createUser } from "../services/userService";
+import { getUsers, createUser, updateUser } from "../services/userService";
 import { getDepartments } from "../services/departmentService";
 
 function UserManagement() {
@@ -14,8 +14,18 @@ function UserManagement() {
     departmentId: "",
   });
 
+  const [editingUser, setEditingUser] = useState(null);
+
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    email: "",
+    departmentId: "",
+    status: "ACTIVE",
+  });
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -50,6 +60,15 @@ function UserManagement() {
     const { name, value } = event.target;
 
     setFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: value,
+    }));
+  };
+
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
+
+    setEditFormData((currentFormData) => ({
       ...currentFormData,
       [name]: value,
     }));
@@ -109,6 +128,87 @@ function UserManagement() {
       setError(error.response?.data?.message || "Failed to create user");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (user) => {
+    setError("");
+    setSuccess("");
+
+    setEditingUser(user);
+
+    setEditFormData({
+      name: user.name,
+      email: user.email,
+      departmentId: user.departmentId || "",
+      status: user.status,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+
+    setEditFormData({
+      name: "",
+      email: "",
+      departmentId: "",
+      status: "ACTIVE",
+    });
+
+    setError("");
+  };
+
+  const handleUpdate = async (event) => {
+    event.preventDefault();
+
+    setError("");
+    setSuccess("");
+
+    if (!editFormData.name.trim()) {
+      setError("Name is required.");
+      return;
+    }
+
+    if (!editFormData.email.trim()) {
+      setError("Email is required.");
+      return;
+    }
+
+    if (!editFormData.departmentId) {
+      setError("User must be assigned to a department.");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+
+      const data = await updateUser(editingUser._id, {
+        name: editFormData.name.trim(),
+        email: editFormData.email.trim(),
+        departmentId: editFormData.departmentId,
+        status: editFormData.status,
+      });
+
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user._id === editingUser._id ? data.user : user,
+        ),
+      );
+
+      setEditingUser(null);
+
+      setEditFormData({
+        name: "",
+        email: "",
+        departmentId: "",
+        status: "ACTIVE",
+      });
+
+      setSuccess(data.message);
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to update user");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -218,6 +318,84 @@ function UserManagement() {
       {error && <p>{error}</p>}
       {success && <p>{success}</p>}
 
+      {editingUser && (
+        <section>
+          <h2>Edit User: {editingUser.name}</h2>
+
+          <form onSubmit={handleUpdate}>
+            <div className="form-field">
+              <label htmlFor="edit-name">Name</label>
+
+              <input
+                id="edit-name"
+                name="name"
+                type="text"
+                value={editFormData.name}
+                onChange={handleEditChange}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="edit-email">Email</label>
+
+              <input
+                id="edit-email"
+                name="email"
+                type="email"
+                value={editFormData.email}
+                onChange={handleEditChange}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="edit-departmentId">Department</label>
+
+              <select
+                id="edit-departmentId"
+                name="departmentId"
+                value={editFormData.departmentId}
+                onChange={handleEditChange}
+              >
+                <option value="">Select a department</option>
+
+                {departments.map((department) => (
+                  <option key={department._id} value={department._id}>
+                    {department.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="edit-status">Status</label>
+
+              <select
+                id="edit-status"
+                name="status"
+                value={editFormData.status}
+                onChange={handleEditChange}
+              >
+                <option value="ACTIVE">Active</option>
+
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+
+            <button type="submit" disabled={updating}>
+              {updating ? "Updating..." : "Save Changes"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              disabled={updating}
+            >
+              Cancel
+            </button>
+          </form>
+        </section>
+      )}
+
       <section>
         <h2>Users</h2>
 
@@ -228,15 +406,27 @@ function UserManagement() {
             {users.map((user) => (
               <article key={user._id}>
                 <h3>{user.name}</h3>
+
                 <p>Email: {user.email}</p>
+
                 <p>Role: {user.role}</p>
+
                 <p>Status: {user.status}</p>
+
                 <p>
                   Department:{" "}
                   {departments.find(
                     (department) => department._id === user.departmentId,
                   )?.name || "Not assigned"}
-                </p>{" "}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => handleEdit(user)}
+                  disabled={updating}
+                >
+                  Edit
+                </button>
               </article>
             ))}
           </div>
