@@ -1,0 +1,78 @@
+.form-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .form-grid-2col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.input-with-affix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.input-with-affix input {
+  padding-left: 2rem !important;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.form-helper-text {
+  font-size: 0.8rem;
+  color: var(--color-text-subtle);
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.back-link:hover {
+  color: var(--color-teal);
+}

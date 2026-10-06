@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CreateBudget from "./pages/CreateBudget";
 import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -16,6 +16,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route
               element={<ProtectedRoute allowedRoles={["ORGANIZATION_ADMIN"]} />}

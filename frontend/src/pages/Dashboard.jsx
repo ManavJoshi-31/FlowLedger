@@ -10,6 +10,7 @@ import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
 import { getFinancialRequests } from "../services/financialRequestService";
 import FinancialRequestList from "../components/FinancialRequestList";
+import "./Dashboard.css";
 
 function Dashboard() {
   const { user } = useContext(AuthContext);
@@ -24,7 +25,7 @@ function Dashboard() {
   const [error, setError] = useState("");
 
   const [budgets, setBudgets] = useState([]);
-  const [budgetsLoading, setBudgetsLoading] = useState(true);
+  const [budgetsLoading, setBudgetsLoading] = useState(false);
   const [budgetsError, setBudgetsError] = useState("");
 
   const [requests, setRequests] = useState([]);
@@ -35,6 +36,7 @@ function Dashboard() {
     user?.role === "DEPARTMENT_MANAGER" ||
     user?.role === "FINANCE_MANAGER" ||
     user?.role === "ORGANIZATION_ADMIN";
+
   const handleRequestUpdated = (updatedRequest) => {
     setRequests((currentRequests) =>
       currentRequests.map((request) =>
@@ -42,6 +44,7 @@ function Dashboard() {
       ),
     );
   };
+
   const handleMarkNotificationAsRead = async (notificationId) => {
     try {
       await markNotificationAsRead(notificationId);
@@ -98,8 +101,6 @@ function Dashboard() {
 
   useEffect(() => {
     if (!canViewBudgets) {
-      setBudgets([]);
-      setBudgetsLoading(false);
       return;
     }
 
@@ -165,83 +166,224 @@ function Dashboard() {
     fetchRequests();
   }, []);
 
+  const todayFormatted = new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const formatRole = (role) => {
+    switch (role) {
+      case "ORGANIZATION_ADMIN":
+        return "Organization Administrator";
+      case "FINANCE_MANAGER":
+        return "Finance Manager";
+      case "DEPARTMENT_MANAGER":
+        return "Department Manager";
+      case "EMPLOYEE":
+        return "Employee";
+      default:
+        return role || "Member";
+    }
+  };
+
   return (
-    <main>
-      <h1>Dashboard</h1>
+    <div className="dashboard-layout">
+      {/* Hero Welcome Banner */}
+      <header className="dashboard-hero">
+        <div className="dashboard-hero-text">
+          <h1 className="dashboard-greeting">
+            Welcome back, {user?.name || "User"}
+          </h1>
+          <p className="dashboard-subtext">
+            {formatRole(user?.role)} &bull; Overview of financial activity &amp; allocations
+          </p>
+        </div>
 
-      {requestsLoading && <p>Loading request statistics...</p>}
+        <div className="dashboard-hero-meta">
+          <span className="dashboard-date-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>{todayFormatted}</span>
+          </span>
+        </div>
+      </header>
 
-      {requestsError && <p>{requestsError}</p>}
-
-      {!requestsLoading && !requestsError && (
-        <section>
-          <h2>Overview</h2>
-
-          {cards.map((card) => (
-            <DashboardCard
-              key={card.title}
-              title={card.title}
-              value={card.value}
-            />
-          ))}
-        </section>
+      {/* KPI Cards Section */}
+      {requestsLoading && (
+        <div className="loading-indicator">
+          <span className="spinner"></span>
+          <span>Loading overview statistics...</span>
+        </div>
       )}
 
-      {requestsLoading && <p>Loading financial requests...</p>}
-
-      {requestsError && <p>{requestsError}</p>}
-
-      {!requestsLoading && !requestsError && (
-        <section>
-          <h2>Financial Requests</h2>
-
-          <FinancialRequestList
-            requests={requests}
-            onRequestUpdated={handleRequestUpdated}
-          />
-        </section>
+      {requestsError && (
+        <div className="alert alert-error" role="alert">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{requestsError}</span>
+        </div>
       )}
 
-      {loading && <p>Loading notifications...</p>}
-
-      {error && <p>{error}</p>}
-
-      {!loading && !error && (
-        <section>
-          <h2>Notifications</h2>
-
-          {notifications.length === 0 ? (
-            <p>No notifications yet.</p>
-          ) : (
-            notifications.map((notification) => (
-              <NotificationItem
-                key={notification._id}
-                notification={notification}
-                onMarkAsRead={handleMarkNotificationAsRead}
+      {!requestsLoading && !requestsError && (
+        <section aria-label="Key Performance Indicators">
+          <div className="dashboard-metrics-grid">
+            {cards.map((card) => (
+              <DashboardCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
               />
-            ))
-          )}
+            ))}
+          </div>
         </section>
       )}
 
-      {canViewBudgets && budgetsLoading && <p>Loading budgets...</p>}
+      {/* Split Layout: Financial Requests vs Notifications & Budgets */}
+      <div className="dashboard-content-split">
+        {/* Left Column: Financial Requests */}
+        <section className="dashboard-section" aria-labelledby="requests-heading">
+          <div className="dashboard-section-header">
+            <h2 id="requests-heading" className="dashboard-section-title">
+              <span>Financial Requests</span>
+              {!requestsLoading && (
+                <span className="dashboard-section-count">{requests.length}</span>
+              )}
+            </h2>
+          </div>
 
-      {canViewBudgets && budgetsError && <p>{budgetsError}</p>}
+          {requestsLoading && (
+            <div className="loading-indicator">
+              <span className="spinner"></span>
+              <span>Loading financial requests...</span>
+            </div>
+          )}
 
-      {canViewBudgets && !budgetsLoading && !budgetsError && (
-        <section>
-          <h2>Budgets</h2>
+          {requestsError && (
+            <div className="alert alert-error" role="alert">
+              <span>{requestsError}</span>
+            </div>
+          )}
 
-          {budgets.length === 0 ? (
-            <p>No budgets found.</p>
-          ) : (
-            budgets.map((budget) => (
-              <BudgetCard key={budget._id} budget={budget} />
-            ))
+          {!requestsLoading && !requestsError && (
+            <FinancialRequestList
+              requests={requests}
+              onRequestUpdated={handleRequestUpdated}
+            />
+          )}
+
+          {/* Budgets Section for Authorized Roles */}
+          {canViewBudgets && (
+            <div style={{ marginTop: "1.5rem" }}>
+              <div className="dashboard-section-header">
+                <h2 className="dashboard-section-title">
+                  <span>Department Budgets</span>
+                  {!budgetsLoading && (
+                    <span className="dashboard-section-count">{budgets.length}</span>
+                  )}
+                </h2>
+              </div>
+
+              {budgetsLoading && (
+                <div className="loading-indicator">
+                  <span className="spinner"></span>
+                  <span>Loading budgets...</span>
+                </div>
+              )}
+
+              {budgetsError && (
+                <div className="alert alert-error" role="alert">
+                  <span>{budgetsError}</span>
+                </div>
+              )}
+
+              {!budgetsLoading && !budgetsError && (
+                <div className="budgets-grid" style={{ marginTop: "1rem" }}>
+                  {budgets.length === 0 ? (
+                    <div className="state-box">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                      </svg>
+                      <span className="state-box-title">No budgets found</span>
+                      <span className="state-box-desc">
+                        No active budgets have been allocated for your role or department yet.
+                      </span>
+                    </div>
+                  ) : (
+                    budgets.map((budget) => (
+                      <BudgetCard key={budget._id} budget={budget} />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </section>
-      )}
-    </main>
+
+        {/* Right Column: Notifications Panel */}
+        <aside className="dashboard-section" aria-labelledby="notifications-heading">
+          <div className="dashboard-section-header">
+            <h2 id="notifications-heading" className="dashboard-section-title">
+              <span>Notifications</span>
+              {!loading && (
+                <span className="dashboard-section-count">
+                  {notifications.filter((n) => !n.isRead).length} new
+                </span>
+              )}
+            </h2>
+          </div>
+
+          <div className="notifications-panel">
+            {loading && (
+              <div className="loading-indicator">
+                <span className="spinner"></span>
+                <span>Loading notifications...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="alert alert-error" role="alert">
+                <span>{error}</span>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <div className="notifications-scroll-list">
+                {notifications.length === 0 ? (
+                  <div className="state-box" style={{ padding: "2rem 1rem" }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span className="state-box-title" style={{ fontSize: "1rem" }}>All caught up</span>
+                    <span className="state-box-desc" style={{ fontSize: "0.85rem" }}>
+                      You have no unread notifications at this time.
+                    </span>
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <NotificationItem
+                      key={notification._id}
+                      notification={notification}
+                      onMarkAsRead={handleMarkNotificationAsRead}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }
 

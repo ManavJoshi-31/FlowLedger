@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser } from "../services/userService";
 import { getDepartments } from "../services/departmentService";
+import "./Management.css";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -43,9 +44,9 @@ function UserManagement() {
 
         setUsers(userData.users);
         setDepartments(departmentData.departments);
-      } catch (error) {
+      } catch (err) {
         setError(
-          error.response?.data?.message ||
+          err.response?.data?.message ||
             "Failed to load user management data",
         );
       } finally {
@@ -123,9 +124,9 @@ function UserManagement() {
         departmentId: "",
       });
 
-      setSuccess(data.message);
-    } catch (error) {
-      setError(error.response?.data?.message || "Failed to create user");
+      setSuccess(data.message || "User created successfully.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create user");
     } finally {
       setSubmitting(false);
     }
@@ -204,235 +205,320 @@ function UserManagement() {
         status: "ACTIVE",
       });
 
-      setSuccess(data.message);
-    } catch (error) {
-      setError(error.response?.data?.message || "Failed to update user");
+      setSuccess(data.message || "User updated successfully.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update user");
     } finally {
       setUpdating(false);
     }
   };
 
+  const formatRoleBadge = (role) => {
+    switch (role) {
+      case "ORGANIZATION_ADMIN":
+        return <span className="badge badge-draft">Admin</span>;
+      case "FINANCE_MANAGER":
+        return <span className="badge badge-pending">Finance Mgr</span>;
+      case "DEPARTMENT_MANAGER":
+        return <span className="badge badge-active">Dept Mgr</span>;
+      case "EMPLOYEE":
+        return <span className="badge badge-draft">Employee</span>;
+      default:
+        return <span className="badge badge-draft">{role}</span>;
+    }
+  };
+
   if (loading) {
     return (
-      <main>
-        <h1>User Management</h1>
-        <p>Loading users...</p>
-      </main>
+      <div className="loading-indicator">
+        <span className="spinner"></span>
+        <span>Loading user accounts...</span>
+      </div>
     );
   }
 
   return (
-    <main>
-      <h1>User Management</h1>
+    <div className="mgmt-page-layout">
+      <div className="page-header">
+        <div className="page-header-content">
+          <h1 className="page-title">User Management</h1>
+          <p className="page-subtitle">
+            Provision organization members, assign roles, and allocate departmental affiliations
+          </p>
+        </div>
+      </div>
 
-      <section>
-        <h2>Create User</h2>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-field">
-            <label htmlFor="name">Name</label>
-
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter name"
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="email">Email</label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="password">Password</label>
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="role">Role</label>
-
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-            >
-              <option value="EMPLOYEE">Employee</option>
-
-              <option value="DEPARTMENT_MANAGER">Department Manager</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="departmentId">
-              Department
-              {formData.role === "EMPLOYEE" && " *"}
-            </label>
-
-            <select
-              id="departmentId"
-              name="departmentId"
-              value={formData.departmentId}
-              onChange={handleChange}
-            >
-              <option value="">
-                {formData.role === "EMPLOYEE"
-                  ? "Select a department"
-                  : "No department assigned"}
-              </option>
-
-              {departments.map((department) => (
-                <option key={department._id} value={department._id}>
-                  {department.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Creating..." : "Create User"}
-          </button>
-        </form>
-      </section>
-
-      {error && <p>{error}</p>}
-      {success && <p>{success}</p>}
-
-      {editingUser && (
-        <section>
-          <h2>Edit User: {editingUser.name}</h2>
-
-          <form onSubmit={handleUpdate}>
-            <div className="form-field">
-              <label htmlFor="edit-name">Name</label>
-
-              <input
-                id="edit-name"
-                name="name"
-                type="text"
-                value={editFormData.name}
-                onChange={handleEditChange}
-              />
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="edit-email">Email</label>
-
-              <input
-                id="edit-email"
-                name="email"
-                type="email"
-                value={editFormData.email}
-                onChange={handleEditChange}
-              />
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="edit-departmentId">Department</label>
-
-              <select
-                id="edit-departmentId"
-                name="departmentId"
-                value={editFormData.departmentId}
-                onChange={handleEditChange}
-              >
-                <option value="">Select a department</option>
-
-                {departments.map((department) => (
-                  <option key={department._id} value={department._id}>
-                    {department.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="edit-status">Status</label>
-
-              <select
-                id="edit-status"
-                name="status"
-                value={editFormData.status}
-                onChange={handleEditChange}
-              >
-                <option value="ACTIVE">Active</option>
-
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
-
-            <button type="submit" disabled={updating}>
-              {updating ? "Updating..." : "Save Changes"}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              disabled={updating}
-            >
-              Cancel
-            </button>
-          </form>
-        </section>
+      {error && (
+        <div className="alert alert-error" role="alert">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
       )}
 
-      <section>
-        <h2>Users</h2>
+      {success && (
+        <div className="alert alert-success" role="status">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>{success}</span>
+        </div>
+      )}
 
-        {users.length === 0 ? (
-          <p>No users found.</p>
-        ) : (
-          <div>
-            {users.map((user) => (
-              <article key={user._id}>
-                <h3>{user.name}</h3>
+      <div className="mgmt-split-grid">
+        {/* Form Panel: Create or Edit User */}
+        <div>
+          {editingUser ? (
+            <div className="mgmt-form-card editing-mode">
+              <div className="mgmt-form-header">
+                <h2 className="mgmt-form-title">Edit User</h2>
+                <span className="mgmt-editing-indicator">Editing Mode</span>
+              </div>
 
-                <p>Email: {user.email}</p>
+              <form onSubmit={handleUpdate}>
+                <div className="form-field">
+                  <label htmlFor="edit-name">Full Name *</label>
+                  <input
+                    id="edit-name"
+                    name="name"
+                    type="text"
+                    value={editFormData.name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
 
-                <p>Role: {user.role}</p>
+                <div className="form-field">
+                  <label htmlFor="edit-email">Email Address *</label>
+                  <input
+                    id="edit-email"
+                    name="email"
+                    type="email"
+                    value={editFormData.email}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
 
-                <p>Status: {user.status}</p>
+                <div className="form-field">
+                  <label htmlFor="edit-departmentId">Department *</label>
+                  <select
+                    id="edit-departmentId"
+                    name="departmentId"
+                    value={editFormData.departmentId}
+                    onChange={handleEditChange}
+                    required
+                  >
+                    <option value="">Select a department</option>
+                    {departments.map((department) => (
+                      <option key={department._id} value={department._id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <p>
-                  Department:{" "}
-                  {departments.find(
-                    (department) => department._id === user.departmentId,
-                  )?.name || "Not assigned"}
-                </p>
+                <div className="form-field">
+                  <label htmlFor="edit-status">Status</label>
+                  <select
+                    id="edit-status"
+                    name="status"
+                    value={editFormData.status}
+                    onChange={handleEditChange}
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                  </select>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleEdit(user)}
-                  disabled={updating}
-                >
-                  Edit
-                </button>
-              </article>
-            ))}
+                <div className="form-actions" style={{ marginTop: "1rem" }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleCancelEdit}
+                    disabled={updating}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary btn-sm" disabled={updating}>
+                    {updating ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="mgmt-form-card">
+              <div className="mgmt-form-header">
+                <h2 className="mgmt-form-title">Create User</h2>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-field">
+                  <label htmlFor="name">Full Name *</label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="e.g. Jane Doe"
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="email">Email Address *</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="jane@company.com"
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="password">Temporary Password *</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="role">Role *</label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                  >
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="DEPARTMENT_MANAGER">Department Manager</option>
+                  </select>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="departmentId">
+                    Department {formData.role === "EMPLOYEE" && "*"}
+                  </label>
+                  <select
+                    id="departmentId"
+                    name="departmentId"
+                    value={formData.departmentId}
+                    onChange={handleChange}
+                  >
+                    <option value="">
+                      {formData.role === "EMPLOYEE"
+                        ? "Select target department"
+                        : "No department assigned"}
+                    </option>
+                    {departments.map((department) => (
+                      <option key={department._id} value={department._id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-actions" style={{ marginTop: "1rem" }}>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? "Creating..." : "Create User"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Existing Users Table Card */}
+        <div className="mgmt-table-card">
+          <div className="mgmt-table-header">
+            <h2 className="mgmt-table-title">Organization Users</h2>
+            <span className="badge badge-draft">{users.length} total</span>
           </div>
-        )}
-      </section>
-    </main>
+
+          {users.length === 0 ? (
+            <div className="state-box" style={{ margin: "1.5rem" }}>
+              <span className="state-box-title">No users registered</span>
+              <span className="state-box-desc">
+                Use the form on the left to add team members to your organization.
+              </span>
+            </div>
+          ) : (
+            <div className="mgmt-table-responsive">
+              <table className="mgmt-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th className="mgmt-actions-cell">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => {
+                    const department = departments.find(
+                      (d) => d._id === user.departmentId,
+                    );
+                    const isSelected = editingUser?._id === user._id;
+
+                    return (
+                      <tr
+                        key={user._id}
+                        style={isSelected ? { backgroundColor: "#f0f7f5" } : undefined}
+                      >
+                        <td>
+                          <div className="mgmt-user-cell">
+                            <span className="mgmt-user-name">{user.name}</span>
+                            <span className="mgmt-user-email">{user.email}</span>
+                          </div>
+                        </td>
+                        <td>{formatRoleBadge(user.role)}</td>
+                        <td>{department ? department.name : "Not assigned"}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              user.status === "ACTIVE"
+                                ? "badge-active"
+                                : "badge-inactive"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+                        <td className="mgmt-actions-cell">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleEdit(user)}
+                            disabled={updating}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
