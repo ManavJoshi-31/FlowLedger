@@ -10,6 +10,8 @@ function FinancialRequestItem({ request, onRequestUpdated }) {
 
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectionRemarks, setRejectionRemarks] = useState("");
 
   const canReview =
     user?.role === "DEPARTMENT_MANAGER" && request.status === "PENDING";
@@ -32,13 +34,23 @@ function FinancialRequestItem({ request, onRequestUpdated }) {
   };
 
   const handleReject = async () => {
+    const remarks = rejectionRemarks.trim();
+
+    if (!remarks) {
+      setActionError("Rejection remarks are required.");
+      return;
+    }
+
     try {
       setActionLoading(true);
       setActionError("");
 
-      const data = await rejectFinancialRequest(request._id);
+      const data = await rejectFinancialRequest(request._id, remarks);
 
       onRequestUpdated(data.financialRequest);
+
+      setRejectionRemarks("");
+      setShowRejectForm(false);
     } catch (error) {
       setActionError(
         error.response?.data?.message || "Failed to reject financial request",
@@ -46,6 +58,12 @@ function FinancialRequestItem({ request, onRequestUpdated }) {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleCancelReject = () => {
+    setRejectionRemarks("");
+    setActionError("");
+    setShowRejectForm(false);
   };
 
   return (
@@ -62,7 +80,7 @@ function FinancialRequestItem({ request, onRequestUpdated }) {
         Created: {new Date(request.createdAt).toLocaleDateString("en-IN")}
       </small>
 
-      {canReview && (
+      {canReview && !showRejectForm && (
         <div>
           <button
             type="button"
@@ -72,8 +90,41 @@ function FinancialRequestItem({ request, onRequestUpdated }) {
             {actionLoading ? "Processing..." : "Approve"}
           </button>
 
+          <button
+            type="button"
+            onClick={() => {
+              setActionError("");
+              setShowRejectForm(true);
+            }}
+            disabled={actionLoading}
+          >
+            Reject
+          </button>
+        </div>
+      )}
+
+      {canReview && showRejectForm && (
+        <div>
+          <label htmlFor={`rejection-${request._id}`}>Rejection Reason</label>
+
+          <textarea
+            id={`rejection-${request._id}`}
+            value={rejectionRemarks}
+            onChange={(event) => setRejectionRemarks(event.target.value)}
+            placeholder="Enter the reason for rejecting this request"
+            disabled={actionLoading}
+          />
+
           <button type="button" onClick={handleReject} disabled={actionLoading}>
-            {actionLoading ? "Processing..." : "Reject"}
+            {actionLoading ? "Rejecting..." : "Confirm Rejection"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCancelReject}
+            disabled={actionLoading}
+          >
+            Cancel
           </button>
         </div>
       )}
