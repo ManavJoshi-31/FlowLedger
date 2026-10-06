@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import FinancialRequest from "../models/FinancialRequest.js";
 import Budget from "../models/Budget.js";
 import User from "../models/User.js";
@@ -342,6 +343,36 @@ export const approveFinancialRequest = async (req, res) => {
           "You are not authorized to approve requests from this department",
       });
     }
+
+    // Find the associated budget and deduct (increment usedAmount)
+    const budget = await Budget.findById(financialRequest.budgetId);
+
+    if (!budget) {
+      return res.status(404).json({
+        message: "Associated budget not found",
+      });
+    }
+
+    if (budget.status !== "ACTIVE") {
+      return res.status(400).json({
+        message: "Cannot approve request against a closed budget",
+      });
+    }
+
+    const currentUsed = Number(budget.usedAmount);
+    const total = Number(budget.totalAmount);
+    const requestAmount = Number(financialRequest.amount);
+
+    if (currentUsed + requestAmount > total) {
+      return res.status(400).json({
+        message: "Insufficient budget remaining to approve this request",
+      });
+    }
+
+    budget.usedAmount = mongoose.Types.Decimal128.fromString(
+      (currentUsed + requestAmount).toString(),
+    );
+    await budget.save();
 
     // Create approval record
     const approval = await Approval.create({

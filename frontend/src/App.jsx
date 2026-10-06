@@ -24,7 +24,11 @@ function App() {
               <Route path="/departments" element={<DepartmentManagement />} />
             </Route>
             <Route
-              element={<ProtectedRoute allowedRoles={["ORGANIZATION_ADMIN"]} />}
+              element={
+                <ProtectedRoute
+                  allowedRoles={["ORGANIZATION_ADMIN", "DEPARTMENT_MANAGER"]}
+                />
+              }
             >
               <Route path="/users" element={<UserManagement />} />
             </Route>

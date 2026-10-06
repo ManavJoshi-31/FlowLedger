@@ -16,7 +16,9 @@ function Navbar() {
     user?.role === "ORGANIZATION_ADMIN";
 
   const canCreateRequest = user?.role === "EMPLOYEE";
-  const canManageOrganization = user?.role === "ORGANIZATION_ADMIN";
+  const canManageDepartments = user?.role === "ORGANIZATION_ADMIN";
+  const canManageUsers =
+    user?.role === "ORGANIZATION_ADMIN" || user?.role === "DEPARTMENT_MANAGER";
 
   const formatRoleLabel = (role) => {
     switch (role) {
@@ -125,27 +127,28 @@ function Navbar() {
                   </NavLink>
                 )}
 
-                {canManageOrganization && (
-                  <>
-                    <NavLink
-                      to="/departments"
-                      className={({ isActive }) =>
-                        isActive ? "navbar-link active" : "navbar-link"
-                      }
-                      onClick={closeMenu}
-                    >
-                      Departments
-                    </NavLink>
-                    <NavLink
-                      to="/users"
-                      className={({ isActive }) =>
-                        isActive ? "navbar-link active" : "navbar-link"
-                      }
-                      onClick={closeMenu}
-                    >
-                      Users
-                    </NavLink>
-                  </>
+                {canManageDepartments && (
+                  <NavLink
+                    to="/departments"
+                    className={({ isActive }) =>
+                      isActive ? "navbar-link active" : "navbar-link"
+                    }
+                    onClick={closeMenu}
+                  >
+                    Departments
+                  </NavLink>
+                )}
+
+                {canManageUsers && (
+                  <NavLink
+                    to="/users"
+                    className={({ isActive }) =>
+                      isActive ? "navbar-link active" : "navbar-link"
+                    }
+                    onClick={closeMenu}
+                  >
+                    Users
+                  </NavLink>
                 )}
               </div>
 

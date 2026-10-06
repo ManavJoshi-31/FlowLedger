@@ -42,10 +42,17 @@ export const createUser = async (req, res) => {
     let managerDepartmentId = null;
 
     if (creatorRole === "DEPARTMENT_MANAGER") {
-      const managerDepartment = await Department.findOne({
+      let managerDepartment = await Department.findOne({
         managerId: req.user.userId,
         organizationId,
       });
+
+      if (!managerDepartment && req.user.departmentId) {
+        managerDepartment = await Department.findOne({
+          _id: req.user.departmentId,
+          organizationId,
+        });
+      }
 
       if (!managerDepartment) {
         return res.status(400).json({
@@ -171,10 +178,17 @@ export const updateUser = async (req, res) => {
       }
 
       // Find manager's current department
-      const managerDepartment = await Department.findOne({
+      let managerDepartment = await Department.findOne({
         managerId: req.user.userId,
         organizationId: req.user.organizationId,
       });
+
+      if (!managerDepartment && req.user.departmentId) {
+        managerDepartment = await Department.findOne({
+          _id: req.user.departmentId,
+          organizationId: req.user.organizationId,
+        });
+      }
 
       if (!managerDepartment) {
         return res.status(400).json({
@@ -316,14 +330,26 @@ export const getUsers = async (req, res) => {
         });
       }
 
-      if (!manager.departmentId) {
+      let deptId = manager.departmentId;
+
+      if (!deptId) {
+        const managedDept = await Department.findOne({
+          managerId: userId,
+          organizationId,
+        });
+        if (managedDept) {
+          deptId = managedDept._id;
+        }
+      }
+
+      if (!deptId) {
         return res.status(400).json({
           message: "Department Manager is not assigned to a department",
         });
       }
 
       query.role = "EMPLOYEE";
-      query.departmentId = manager.departmentId;
+      query.departmentId = deptId;
     }
 
     const users = await User.find(query)

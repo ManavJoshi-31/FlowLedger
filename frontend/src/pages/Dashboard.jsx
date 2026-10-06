@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import DashboardCard from "../components/DashboardCard";
 import {
@@ -15,10 +16,22 @@ import "./Dashboard.css";
 function Dashboard() {
   const { user } = useContext(AuthContext);
 
+  const isFinanceManager = user?.role === "FINANCE_MANAGER";
+
+  const canViewBudgets =
+    user?.role === "DEPARTMENT_MANAGER" ||
+    user?.role === "FINANCE_MANAGER" ||
+    user?.role === "ORGANIZATION_ADMIN";
+
+  const canViewRequests =
+    user?.role === "EMPLOYEE" ||
+    user?.role === "DEPARTMENT_MANAGER" ||
+    user?.role === "ORGANIZATION_ADMIN";
+
   // → actual data returned by backend
   const [notifications, setNotifications] = useState([]);
 
-  // → whether the request is currently running
+  // → whether the notification request is currently running
   const [loading, setLoading] = useState(true);
 
   // → error message we want to show to the user
@@ -29,13 +42,8 @@ function Dashboard() {
   const [budgetsError, setBudgetsError] = useState("");
 
   const [requests, setRequests] = useState([]);
-  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(canViewRequests);
   const [requestsError, setRequestsError] = useState("");
-
-  const canViewBudgets =
-    user?.role === "DEPARTMENT_MANAGER" ||
-    user?.role === "FINANCE_MANAGER" ||
-    user?.role === "ORGANIZATION_ADMIN";
 
   const handleRequestUpdated = (updatedRequest) => {
     setRequests((currentRequests) =>
@@ -43,6 +51,12 @@ function Dashboard() {
         request._id === updatedRequest._id ? updatedRequest : request,
       ),
     );
+
+    if (canViewBudgets) {
+      getBudgets()
+        .then((data) => setBudgets(data.budgets))
+        .catch((err) => console.error("Failed to refresh budgets:", err));
+    }
   };
 
   const handleMarkNotificationAsRead = async (notificationId) => {
@@ -75,28 +89,67 @@ function Dashboard() {
     (request) => request.status === "APPROVED",
   ).length;
 
-  const availableBudget = budgets.reduce(
-    (total, budget) =>
-      total + (Number(budget.totalAmount) - Number(budget.usedAmount)),
+  const totalAllocated = budgets.reduce(
+    (total, budget) => total + Number(budget.totalAmount || 0),
     0,
   );
 
-  const cards = [
-    {
-      title: "Pending Requests",
-      value: pendingRequests,
-    },
-    {
-      title: "Approved Requests",
-      value: approvedRequests,
-    },
-  ];
+  const totalUsed = budgets.reduce(
+    (total, budget) => total + Number(budget.usedAmount || 0),
+    0,
+  );
 
-  if (canViewBudgets) {
-    cards.push({
-      title: "Available Budget",
-      value: `₹${availableBudget.toLocaleString("en-IN")}`,
-    });
+  const availableBudget = budgets.reduce(
+    (total, budget) =>
+      total + (Number(budget.totalAmount || 0) - Number(budget.usedAmount || 0)),
+    0,
+  );
+
+  const activeBudgetsCount = budgets.filter(
+    (budget) => budget.status === "ACTIVE",
+  ).length;
+
+  let cards = [];
+
+  if (isFinanceManager) {
+    cards = [
+      {
+        title: "Total Allocated Budget",
+        value: `₹${totalAllocated.toLocaleString("en-IN")}`,
+      },
+      {
+        title: "Total Utilized",
+        value: `₹${totalUsed.toLocaleString("en-IN")}`,
+      },
+      {
+        title: "Available Balance",
+        value: `₹${availableBudget.toLocaleString("en-IN")}`,
+      },
+      {
+        title: "Active Budgets",
+        value: `${activeBudgetsCount} / ${budgets.length}`,
+      },
+    ];
+  } else {
+    if (canViewRequests) {
+      cards.push(
+        {
+          title: "Pending Requests",
+          value: pendingRequests,
+        },
+        {
+          title: "Approved Requests",
+          value: approvedRequests,
+        },
+      );
+    }
+
+    if (canViewBudgets) {
+      cards.push({
+        title: "Available Budget",
+        value: `₹${availableBudget.toLocaleString("en-IN")}`,
+      });
+    }
   }
 
   useEffect(() => {
@@ -146,6 +199,10 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
+    if (!canViewRequests) {
+      return;
+    }
+
     const fetchRequests = async () => {
       try {
         setRequestsLoading(true);
@@ -164,7 +221,7 @@ function Dashboard() {
     };
 
     fetchRequests();
-  }, []);
+  }, [canViewRequests]);
 
   const todayFormatted = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
@@ -188,6 +245,9 @@ function Dashboard() {
     }
   };
 
+  const isKpiLoading = isFinanceManager ? budgetsLoading : requestsLoading;
+  const kpiError = isFinanceManager ? budgetsError : requestsError;
+
   return (
     <div className="dashboard-layout">
       {/* Hero Welcome Banner */}
@@ -197,7 +257,10 @@ function Dashboard() {
             Welcome back, {user?.name || "User"}
           </h1>
           <p className="dashboard-subtext">
-            {formatRole(user?.role)} &bull; Overview of financial activity &amp; allocations
+            {formatRole(user?.role)} &bull;{" "}
+            {isFinanceManager
+              ? "Department budget allocation & financial governance"
+              : "Overview of financial activity & allocations"}
           </p>
         </div>
 
@@ -215,25 +278,25 @@ function Dashboard() {
       </header>
 
       {/* KPI Cards Section */}
-      {requestsLoading && (
+      {isKpiLoading && (
         <div className="loading-indicator">
           <span className="spinner"></span>
           <span>Loading overview statistics...</span>
         </div>
       )}
 
-      {requestsError && (
+      {kpiError && (
         <div className="alert alert-error" role="alert">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <span>{requestsError}</span>
+          <span>{kpiError}</span>
         </div>
       )}
 
-      {!requestsLoading && !requestsError && (
+      {!isKpiLoading && !kpiError && (
         <section aria-label="Key Performance Indicators">
           <div className="dashboard-metrics-grid">
             {cards.map((card) => (
@@ -247,87 +310,148 @@ function Dashboard() {
         </section>
       )}
 
-      {/* Split Layout: Financial Requests vs Notifications & Budgets */}
+      {/* Split Layout: Main Content vs Notifications */}
       <div className="dashboard-content-split">
-        {/* Left Column: Financial Requests */}
-        <section className="dashboard-section" aria-labelledby="requests-heading">
-          <div className="dashboard-section-header">
-            <h2 id="requests-heading" className="dashboard-section-title">
-              <span>Financial Requests</span>
-              {!requestsLoading && (
-                <span className="dashboard-section-count">{requests.length}</span>
-              )}
-            </h2>
-          </div>
-
-          {requestsLoading && (
-            <div className="loading-indicator">
-              <span className="spinner"></span>
-              <span>Loading financial requests...</span>
-            </div>
-          )}
-
-          {requestsError && (
-            <div className="alert alert-error" role="alert">
-              <span>{requestsError}</span>
-            </div>
-          )}
-
-          {!requestsLoading && !requestsError && (
-            <FinancialRequestList
-              requests={requests}
-              onRequestUpdated={handleRequestUpdated}
-            />
-          )}
-
-          {/* Budgets Section for Authorized Roles */}
-          {canViewBudgets && (
-            <div style={{ marginTop: "1.5rem" }}>
-              <div className="dashboard-section-header">
-                <h2 className="dashboard-section-title">
-                  <span>Department Budgets</span>
-                  {!budgetsLoading && (
-                    <span className="dashboard-section-count">{budgets.length}</span>
-                  )}
-                </h2>
+        {/* Left Column for Finance Manager: Department Budgets */}
+        {isFinanceManager ? (
+          <section className="dashboard-section" aria-labelledby="budgets-heading">
+            <div className="dashboard-section-header">
+              <h2 id="budgets-heading" className="dashboard-section-title">
+                <span>Department Budgets</span>
+                {!budgetsLoading && (
+                  <span className="dashboard-section-count">{budgets.length}</span>
+                )}
+              </h2>
+              <div className="dashboard-section-actions">
+                <Link to="/budgets/new" className="btn btn-primary btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span>Create Budget</span>
+                </Link>
               </div>
-
-              {budgetsLoading && (
-                <div className="loading-indicator">
-                  <span className="spinner"></span>
-                  <span>Loading budgets...</span>
-                </div>
-              )}
-
-              {budgetsError && (
-                <div className="alert alert-error" role="alert">
-                  <span>{budgetsError}</span>
-                </div>
-              )}
-
-              {!budgetsLoading && !budgetsError && (
-                <div className="budgets-grid" style={{ marginTop: "1rem" }}>
-                  {budgets.length === 0 ? (
-                    <div className="state-box">
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                      </svg>
-                      <span className="state-box-title">No budgets found</span>
-                      <span className="state-box-desc">
-                        No active budgets have been allocated for your role or department yet.
-                      </span>
-                    </div>
-                  ) : (
-                    budgets.map((budget) => (
-                      <BudgetCard key={budget._id} budget={budget} />
-                    ))
-                  )}
-                </div>
-              )}
             </div>
-          )}
-        </section>
+
+            {budgetsLoading && (
+              <div className="loading-indicator">
+                <span className="spinner"></span>
+                <span>Loading budgets...</span>
+              </div>
+            )}
+
+            {budgetsError && (
+              <div className="alert alert-error" role="alert">
+                <span>{budgetsError}</span>
+              </div>
+            )}
+
+            {!budgetsLoading && !budgetsError && (
+              <div className="budgets-grid" style={{ marginTop: "1rem" }}>
+                {budgets.length === 0 ? (
+                  <div className="state-box">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                    <span className="state-box-title">No budgets found</span>
+                    <span className="state-box-desc">
+                      Get started by allocating departmental budgets.
+                    </span>
+                  </div>
+                ) : (
+                  budgets.map((budget) => (
+                    <BudgetCard key={budget._id} budget={budget} />
+                  ))
+                )}
+              </div>
+            )}
+          </section>
+        ) : (
+          /* Left Column for Roles Authorized to View Financial Requests */
+          <section className="dashboard-section" aria-labelledby="requests-heading">
+            {canViewRequests && (
+              <>
+                <div className="dashboard-section-header">
+                  <h2 id="requests-heading" className="dashboard-section-title">
+                    <span>Financial Requests</span>
+                    {!requestsLoading && (
+                      <span className="dashboard-section-count">{requests.length}</span>
+                    )}
+                  </h2>
+                </div>
+
+                {requestsLoading && (
+                  <div className="loading-indicator">
+                    <span className="spinner"></span>
+                    <span>Loading financial requests...</span>
+                  </div>
+                )}
+
+                {requestsError && (
+                  <div className="alert alert-error" role="alert">
+                    <span>{requestsError}</span>
+                  </div>
+                )}
+
+                {!requestsLoading && !requestsError && (
+                  <FinancialRequestList
+                    requests={requests}
+                    onRequestUpdated={handleRequestUpdated}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Budgets Section for Authorized Roles (Department Manager & Org Admin) */}
+            {canViewBudgets && (
+              <div style={{ marginTop: canViewRequests ? "1.5rem" : "0" }}>
+                <div className="dashboard-section-header">
+                  <h2 className="dashboard-section-title">
+                    <span>Department Budgets</span>
+                    {!budgetsLoading && (
+                      <span className="dashboard-section-count">{budgets.length}</span>
+                    )}
+                  </h2>
+                </div>
+
+                {budgetsLoading && (
+                  <div className="loading-indicator">
+                    <span className="spinner"></span>
+                    <span>Loading budgets...</span>
+                  </div>
+                )}
+
+                {budgetsError && (
+                  <div className="alert alert-error" role="alert">
+                    <span>{budgetsError}</span>
+                  </div>
+                )}
+
+                {!budgetsLoading && !budgetsError && (
+                  <div className="budgets-grid" style={{ marginTop: "1rem" }}>
+                    {budgets.length === 0 ? (
+                      <div className="state-box">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                        </svg>
+                        <span className="state-box-title">No budgets found</span>
+                        <span className="state-box-desc">
+                          No active budgets have been allocated for your role or department yet.
+                        </span>
+                      </div>
+                    ) : (
+                      budgets.map((budget) => (
+                        <BudgetCard key={budget._id} budget={budget} />
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Right Column: Notifications Panel */}
         <aside className="dashboard-section" aria-labelledby="notifications-heading">

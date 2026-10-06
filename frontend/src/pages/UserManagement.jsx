@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import AuthContext from "../context/AuthContext";
 import { getUsers, createUser, updateUser } from "../services/userService";
 import { getDepartments } from "../services/departmentService";
 import "./Management.css";
 
 function UserManagement() {
+  const { user } = useContext(AuthContext);
+  const isDeptManager = user?.role === "DEPARTMENT_MANAGER";
+  const isAdmin = user?.role === "ORGANIZATION_ADMIN";
+
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
 
@@ -37,13 +42,19 @@ function UserManagement() {
         setLoading(true);
         setError("");
 
-        const [userData, departmentData] = await Promise.all([
-          getUsers(),
-          getDepartments(),
-        ]);
+        if (isAdmin) {
+          const [userData, departmentData] = await Promise.all([
+            getUsers(),
+            getDepartments(),
+          ]);
 
-        setUsers(userData.users);
-        setDepartments(departmentData.departments);
+          setUsers(userData.users);
+          setDepartments(departmentData.departments);
+        } else {
+          // Department Manager: fetch users only (getDepartments is restricted)
+          const userData = await getUsers();
+          setUsers(userData.users);
+        }
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -55,7 +66,7 @@ function UserManagement() {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -96,7 +107,7 @@ function UserManagement() {
       return;
     }
 
-    if (formData.role === "EMPLOYEE" && !formData.departmentId) {
+    if (isAdmin && formData.role === "EMPLOYEE" && !formData.departmentId) {
       setError("Employee must be assigned to a department.");
       return;
     }
@@ -104,15 +115,17 @@ function UserManagement() {
     try {
       setSubmitting(true);
 
-      const data = await createUser({
+      const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
-        role: formData.role,
-        ...(formData.departmentId && {
+        role: isDeptManager ? "EMPLOYEE" : formData.role,
+        ...(isAdmin && formData.departmentId && {
           departmentId: formData.departmentId,
         }),
-      });
+      };
+
+      const data = await createUser(payload);
 
       setUsers((currentUsers) => [...currentUsers, data.user]);
 
@@ -132,17 +145,17 @@ function UserManagement() {
     }
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = (userToEdit) => {
     setError("");
     setSuccess("");
 
-    setEditingUser(user);
+    setEditingUser(userToEdit);
 
     setEditFormData({
-      name: user.name,
-      email: user.email,
-      departmentId: user.departmentId || "",
-      status: user.status,
+      name: userToEdit.name,
+      email: userToEdit.email,
+      departmentId: userToEdit.departmentId || "",
+      status: userToEdit.status,
     });
   };
 
@@ -175,7 +188,7 @@ function UserManagement() {
       return;
     }
 
-    if (!editFormData.departmentId) {
+    if (isAdmin && !editFormData.departmentId) {
       setError("User must be assigned to a department.");
       return;
     }
@@ -183,16 +196,22 @@ function UserManagement() {
     try {
       setUpdating(true);
 
-      const data = await updateUser(editingUser._id, {
+      const payload = {
         name: editFormData.name.trim(),
         email: editFormData.email.trim(),
-        departmentId: editFormData.departmentId,
         status: editFormData.status,
-      });
+      };
+
+      // Only Org Admin can alter department assignment
+      if (isAdmin && editFormData.departmentId) {
+        payload.departmentId = editFormData.departmentId;
+      }
+
+      const data = await updateUser(editingUser._id, payload);
 
       setUsers((currentUsers) =>
-        currentUsers.map((user) =>
-          user._id === editingUser._id ? data.user : user,
+        currentUsers.map((u) =>
+          u._id === editingUser._id ? data.user : u,
         ),
       );
 
@@ -241,9 +260,13 @@ function UserManagement() {
     <div className="mgmt-page-layout">
       <div className="page-header">
         <div className="page-header-content">
-          <h1 className="page-title">User Management</h1>
+          <h1 className="page-title">
+            {isDeptManager ? "Department Team Management" : "User Management"}
+          </h1>
           <p className="page-subtitle">
-            Provision organization members, assign roles, and allocate departmental affiliations
+            {isDeptManager
+              ? "Provision employee accounts for your department and manage team member access"
+              : "Provision organization members, assign roles, and allocate departmental affiliations"}
           </p>
         </div>
       </div>
@@ -275,7 +298,9 @@ function UserManagement() {
           {editingUser ? (
             <div className="mgmt-form-card editing-mode">
               <div className="mgmt-form-header">
-                <h2 className="mgmt-form-title">Edit User</h2>
+                <h2 className="mgmt-form-title">
+                  {isDeptManager ? "Edit Employee" : "Edit User"}
+                </h2>
                 <span className="mgmt-editing-indicator">Editing Mode</span>
               </div>
 
@@ -306,20 +331,34 @@ function UserManagement() {
 
                 <div className="form-field">
                   <label htmlFor="edit-departmentId">Department *</label>
-                  <select
-                    id="edit-departmentId"
-                    name="departmentId"
-                    value={editFormData.departmentId}
-                    onChange={handleEditChange}
-                    required
-                  >
-                    <option value="">Select a department</option>
-                    {departments.map((department) => (
-                      <option key={department._id} value={department._id}>
-                        {department.name}
-                      </option>
-                    ))}
-                  </select>
+                  {isDeptManager ? (
+                    <>
+                      <input
+                        id="edit-departmentId"
+                        type="text"
+                        value="Your Department (Fixed)"
+                        disabled
+                      />
+                      <span style={{ fontSize: "0.8rem", color: "var(--color-steel)", marginTop: "0.25rem", display: "block" }}>
+                        Department Managers cannot change an employee&apos;s department.
+                      </span>
+                    </>
+                  ) : (
+                    <select
+                      id="edit-departmentId"
+                      name="departmentId"
+                      value={editFormData.departmentId}
+                      onChange={handleEditChange}
+                      required
+                    >
+                      <option value="">Select a department</option>
+                      {departments.map((department) => (
+                        <option key={department._id} value={department._id}>
+                          {department.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div className="form-field">
@@ -353,7 +392,9 @@ function UserManagement() {
           ) : (
             <div className="mgmt-form-card">
               <div className="mgmt-form-header">
-                <h2 className="mgmt-form-title">Create User</h2>
+                <h2 className="mgmt-form-title">
+                  {isDeptManager ? "Add Employee" : "Create User"}
+                </h2>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -398,43 +439,73 @@ function UserManagement() {
 
                 <div className="form-field">
                   <label htmlFor="role">Role *</label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                  >
-                    <option value="EMPLOYEE">Employee</option>
-                    <option value="DEPARTMENT_MANAGER">Department Manager</option>
-                  </select>
+                  {isDeptManager ? (
+                    <>
+                      <input
+                        id="role"
+                        type="text"
+                        value="Employee"
+                        disabled
+                      />
+                      <span style={{ fontSize: "0.8rem", color: "var(--color-steel)", marginTop: "0.25rem", display: "block" }}>
+                        Department Managers can create employee accounts only.
+                      </span>
+                    </>
+                  ) : (
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                    >
+                      <option value="EMPLOYEE">Employee</option>
+                      <option value="DEPARTMENT_MANAGER">Department Manager</option>
+                    </select>
+                  )}
                 </div>
 
                 <div className="form-field">
                   <label htmlFor="departmentId">
-                    Department {formData.role === "EMPLOYEE" && "*"}
+                    Department {(!isDeptManager && formData.role === "EMPLOYEE") && "*"}
                   </label>
-                  <select
-                    id="departmentId"
-                    name="departmentId"
-                    value={formData.departmentId}
-                    onChange={handleChange}
-                  >
-                    <option value="">
-                      {formData.role === "EMPLOYEE"
-                        ? "Select target department"
-                        : "No department assigned"}
-                    </option>
-                    {departments.map((department) => (
-                      <option key={department._id} value={department._id}>
-                        {department.name}
+                  {isDeptManager ? (
+                    <>
+                      <input
+                        id="departmentId"
+                        type="text"
+                        value="Your Department (Auto-assigned)"
+                        disabled
+                      />
+                      <span style={{ fontSize: "0.8rem", color: "var(--color-steel)", marginTop: "0.25rem", display: "block" }}>
+                        New employees are automatically assigned to your managed department.
+                      </span>
+                    </>
+                  ) : (
+                    <select
+                      id="departmentId"
+                      name="departmentId"
+                      value={formData.departmentId}
+                      onChange={handleChange}
+                    >
+                      <option value="">
+                        {formData.role === "EMPLOYEE"
+                          ? "Select target department"
+                          : "No department assigned"}
                       </option>
-                    ))}
-                  </select>
+                      {departments.map((department) => (
+                        <option key={department._id} value={department._id}>
+                          {department.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div className="form-actions" style={{ marginTop: "1rem" }}>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
-                    {submitting ? "Creating..." : "Create User"}
+                    {submitting
+                      ? (isDeptManager ? "Adding..." : "Creating...")
+                      : (isDeptManager ? "Add Employee" : "Create User")}
                   </button>
                 </div>
               </form>
@@ -445,7 +516,9 @@ function UserManagement() {
         {/* Existing Users Table Card */}
         <div className="mgmt-table-card">
           <div className="mgmt-table-header">
-            <h2 className="mgmt-table-title">Organization Users</h2>
+            <h2 className="mgmt-table-title">
+              {isDeptManager ? "Department Employees" : "Organization Users"}
+            </h2>
             <span className="badge badge-draft">{users.length} total</span>
           </div>
 
@@ -453,7 +526,9 @@ function UserManagement() {
             <div className="state-box" style={{ margin: "1.5rem" }}>
               <span className="state-box-title">No users registered</span>
               <span className="state-box-desc">
-                Use the form on the left to add team members to your organization.
+                {isDeptManager
+                  ? "Use the form on the left to add employee accounts for your department."
+                  : "Use the form on the left to add team members to your organization."}
               </span>
             </div>
           ) : (
@@ -469,41 +544,45 @@ function UserManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => {
+                  {users.map((u) => {
                     const department = departments.find(
-                      (d) => d._id === user.departmentId,
+                      (d) => d._id === u.departmentId,
                     );
-                    const isSelected = editingUser?._id === user._id;
+                    const isSelected = editingUser?._id === u._id;
 
                     return (
                       <tr
-                        key={user._id}
+                        key={u._id}
                         style={isSelected ? { backgroundColor: "#f0f7f5" } : undefined}
                       >
                         <td>
                           <div className="mgmt-user-cell">
-                            <span className="mgmt-user-name">{user.name}</span>
-                            <span className="mgmt-user-email">{user.email}</span>
+                            <span className="mgmt-user-name">{u.name}</span>
+                            <span className="mgmt-user-email">{u.email}</span>
                           </div>
                         </td>
-                        <td>{formatRoleBadge(user.role)}</td>
-                        <td>{department ? department.name : "Not assigned"}</td>
+                        <td>{formatRoleBadge(u.role)}</td>
+                        <td>
+                          {isDeptManager
+                            ? "Your Department"
+                            : (department ? department.name : "Not assigned")}
+                        </td>
                         <td>
                           <span
                             className={`badge ${
-                              user.status === "ACTIVE"
+                              u.status === "ACTIVE"
                                 ? "badge-active"
                                 : "badge-inactive"
                             }`}
                           >
-                            {user.status}
+                            {u.status}
                           </span>
                         </td>
                         <td className="mgmt-actions-cell">
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
-                            onClick={() => handleEdit(user)}
+                            onClick={() => handleEdit(u)}
                             disabled={updating}
                           >
                             Edit
