@@ -9,6 +9,7 @@ import {
 import NotificationItem from "../components/NotificationItem";
 import BudgetCard from "../components/BudgetCard";
 import { getBudgets } from "../services/budgetService";
+import { getDepartments } from "../services/departmentService";
 import { getFinancialRequests } from "../services/financialRequestService";
 import FinancialRequestList from "../components/FinancialRequestList";
 import "./Dashboard.css";
@@ -38,6 +39,7 @@ function Dashboard() {
   const [error, setError] = useState("");
 
   const [budgets, setBudgets] = useState([]);
+  const [departmentsMap, setDepartmentsMap] = useState({});
   const [budgetsLoading, setBudgetsLoading] = useState(false);
   const [budgetsError, setBudgetsError] = useState("");
 
@@ -162,9 +164,29 @@ function Dashboard() {
         setBudgetsLoading(true);
         setBudgetsError("");
 
-        const data = await getBudgets();
+        const budgetsPromise = getBudgets();
+        const canFetchDepts =
+          user?.role === "FINANCE_MANAGER" ||
+          user?.role === "ORGANIZATION_ADMIN";
 
-        setBudgets(data.budgets);
+        const deptsPromise = canFetchDepts
+          ? getDepartments().catch(() => ({ departments: [] }))
+          : Promise.resolve({ departments: [] });
+
+        const [budgetsData, deptsData] = await Promise.all([
+          budgetsPromise,
+          deptsPromise,
+        ]);
+
+        setBudgets(budgetsData.budgets || []);
+
+        if (deptsData?.departments) {
+          const map = {};
+          deptsData.departments.forEach((d) => {
+            map[d._id] = d.name;
+          });
+          setDepartmentsMap(map);
+        }
       } catch (error) {
         setBudgetsError(
           error.response?.data?.message || "Failed to load budgets",
@@ -175,7 +197,7 @@ function Dashboard() {
     };
 
     fetchBudgets();
-  }, [canViewBudgets]);
+  }, [canViewBudgets, user?.role]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -361,7 +383,15 @@ function Dashboard() {
                   </div>
                 ) : (
                   budgets.map((budget) => (
-                    <BudgetCard key={budget._id} budget={budget} />
+                    <BudgetCard
+                      key={budget._id}
+                      budget={budget}
+                      departmentName={
+                        departmentsMap[budget.departmentId] ||
+                        budget.departmentName ||
+                        "Department Budget"
+                      }
+                    />
                   ))
                 )}
               </div>
@@ -443,7 +473,17 @@ function Dashboard() {
                       </div>
                     ) : (
                       budgets.map((budget) => (
-                        <BudgetCard key={budget._id} budget={budget} />
+                        <BudgetCard
+                          key={budget._id}
+                          budget={budget}
+                          departmentName={
+                            departmentsMap[budget.departmentId] ||
+                            budget.departmentName ||
+                            (user?.role === "DEPARTMENT_MANAGER"
+                              ? "Your Department Budget"
+                              : "Department Budget")
+                          }
+                        />
                       ))
                     )}
                   </div>
