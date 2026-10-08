@@ -8,6 +8,7 @@ import Budgets from "./pages/Budgets";
 import CreateFinancialRequest from "./pages/CreateFinancialRequest";
 import DepartmentManagement from "./pages/DepartmentManagement";
 import UserManagement from "./pages/UserManagement";
+import AuditLogs from "./pages/AuditLogs";
 function App() {
   return (
     <BrowserRouter>
@@ -31,6 +32,17 @@ function App() {
               }
             >
               <Route path="/users" element={<UserManagement />} />
+            </Route>
+
+            {/* Audit & Activity History */}
+            <Route
+              element={
+                <ProtectedRoute
+                  allowedRoles={["ORGANIZATION_ADMIN", "DEPARTMENT_MANAGER"]}
+                />
+              }
+            >
+              <Route path="/audit-logs" element={<AuditLogs />} />
             </Route>
             {/* Budget viewing */}
             <Route

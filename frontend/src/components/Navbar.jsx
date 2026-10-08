@@ -19,6 +19,8 @@ function Navbar() {
   const canManageDepartments = user?.role === "ORGANIZATION_ADMIN";
   const canManageUsers =
     user?.role === "ORGANIZATION_ADMIN" || user?.role === "DEPARTMENT_MANAGER";
+  const canViewAuditHistory =
+    user?.role === "ORGANIZATION_ADMIN" || user?.role === "DEPARTMENT_MANAGER";
 
   const formatRoleLabel = (role) => {
     switch (role) {
@@ -148,6 +150,18 @@ function Navbar() {
                     onClick={closeMenu}
                   >
                     Users
+                  </NavLink>
+                )}
+
+                {canViewAuditHistory && (
+                  <NavLink
+                    to="/audit-logs"
+                    className={({ isActive }) =>
+                      isActive ? "navbar-link active" : "navbar-link"
+                    }
+                    onClick={closeMenu}
+                  >
+                    Audit History
                   </NavLink>
                 )}
               </div>
