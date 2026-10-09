@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { Outlet } from "react-router-dom";
+import Navbar from "../components/navbar/Navbar";
 
 function AppLayout() {
   const currentYear = new Date().getFullYear();
@@ -14,7 +14,10 @@ function AppLayout() {
 
       <footer className="app-footer">
         <div className="app-footer-content">
-          <span>FlowLedger &bull; Enterprise Financial Ledger &amp; Budget Governance</span>
+          <span>
+            FlowLedger &bull; Enterprise Financial Ledger &amp; Budget
+            Governance
+          </span>
           <span>&copy; {currentYear} All rights reserved.</span>
         </div>
       </footer>

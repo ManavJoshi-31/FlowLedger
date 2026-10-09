@@ -1,17 +1,17 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
-import DashboardCard from "../components/DashboardCard";
+import DashboardCard from "../components/dashboard/DashboardCard";
 import {
   getDashboardNotifications,
   markNotificationAsRead,
 } from "../services/dashboardService";
-import NotificationItem from "../components/NotificationItem";
-import BudgetCard from "../components/BudgetCard";
+import NotificationItem from "../components/notification/NotificationItem";
+import BudgetCard from "../components/budget/BudgetCard";
 import { getBudgets } from "../services/budgetService";
 import { getDepartments } from "../services/departmentService";
 import { getFinancialRequests } from "../services/financialRequestService";
-import FinancialRequestList from "../components/FinancialRequestList";
+import FinancialRequestList from "../components/financialRequest/FinancialRequestList";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -103,7 +103,8 @@ function Dashboard() {
 
   const availableBudget = budgets.reduce(
     (total, budget) =>
-      total + (Number(budget.totalAmount || 0) - Number(budget.usedAmount || 0)),
+      total +
+      (Number(budget.totalAmount || 0) - Number(budget.usedAmount || 0)),
     0,
   );
 
@@ -288,7 +289,17 @@ function Dashboard() {
 
         <div className="dashboard-hero-meta">
           <span className="dashboard-date-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
@@ -309,7 +320,17 @@ function Dashboard() {
 
       {kpiError && (
         <div className="alert alert-error" role="alert">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -336,17 +357,32 @@ function Dashboard() {
       <div className="dashboard-content-split">
         {/* Left Column for Finance Manager: Department Budgets */}
         {isFinanceManager ? (
-          <section className="dashboard-section" aria-labelledby="budgets-heading">
+          <section
+            className="dashboard-section"
+            aria-labelledby="budgets-heading"
+          >
             <div className="dashboard-section-header">
               <h2 id="budgets-heading" className="dashboard-section-title">
                 <span>Department Budgets</span>
                 {!budgetsLoading && (
-                  <span className="dashboard-section-count">{budgets.length}</span>
+                  <span className="dashboard-section-count">
+                    {budgets.length}
+                  </span>
                 )}
               </h2>
               <div className="dashboard-section-actions">
                 <Link to="/budgets/new" className="btn btn-primary btn-sm">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
@@ -372,7 +408,17 @@ function Dashboard() {
               <div className="budgets-grid" style={{ marginTop: "1rem" }}>
                 {budgets.length === 0 ? (
                   <div className="state-box">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                    <svg
+                      width="40"
+                      height="40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ color: "var(--color-steel)" }}
+                    >
                       <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                     </svg>
@@ -399,14 +445,19 @@ function Dashboard() {
           </section>
         ) : (
           /* Left Column for Roles Authorized to View Financial Requests */
-          <section className="dashboard-section" aria-labelledby="requests-heading">
+          <section
+            className="dashboard-section"
+            aria-labelledby="requests-heading"
+          >
             {canViewRequests && (
               <>
                 <div className="dashboard-section-header">
                   <h2 id="requests-heading" className="dashboard-section-title">
                     <span>Financial Requests</span>
                     {!requestsLoading && (
-                      <span className="dashboard-section-count">{requests.length}</span>
+                      <span className="dashboard-section-count">
+                        {requests.length}
+                      </span>
                     )}
                   </h2>
                 </div>
@@ -440,7 +491,9 @@ function Dashboard() {
                   <h2 className="dashboard-section-title">
                     <span>Department Budgets</span>
                     {!budgetsLoading && (
-                      <span className="dashboard-section-count">{budgets.length}</span>
+                      <span className="dashboard-section-count">
+                        {budgets.length}
+                      </span>
                     )}
                   </h2>
                 </div>
@@ -462,13 +515,33 @@ function Dashboard() {
                   <div className="budgets-grid" style={{ marginTop: "1rem" }}>
                     {budgets.length === 0 ? (
                       <div className="state-box">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
-                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <svg
+                          width="40"
+                          height="40"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ color: "var(--color-steel)" }}
+                        >
+                          <rect
+                            x="2"
+                            y="7"
+                            width="20"
+                            height="14"
+                            rx="2"
+                            ry="2"
+                          />
                           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                         </svg>
-                        <span className="state-box-title">No budgets found</span>
+                        <span className="state-box-title">
+                          No budgets found
+                        </span>
                         <span className="state-box-desc">
-                          No active budgets have been allocated for your role or department yet.
+                          No active budgets have been allocated for your role or
+                          department yet.
                         </span>
                       </div>
                     ) : (
@@ -494,7 +567,10 @@ function Dashboard() {
         )}
 
         {/* Right Column: Notifications Panel */}
-        <aside className="dashboard-section" aria-labelledby="notifications-heading">
+        <aside
+          className="dashboard-section"
+          aria-labelledby="notifications-heading"
+        >
           <div className="dashboard-section-header">
             <h2 id="notifications-heading" className="dashboard-section-title">
               <span>Notifications</span>
@@ -524,12 +600,30 @@ function Dashboard() {
               <div className="notifications-scroll-list">
                 {notifications.length === 0 ? (
                   <div className="state-box" style={{ padding: "2rem 1rem" }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ color: "var(--color-steel)" }}
+                    >
                       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
-                    <span className="state-box-title" style={{ fontSize: "1rem" }}>All caught up</span>
-                    <span className="state-box-desc" style={{ fontSize: "0.85rem" }}>
+                    <span
+                      className="state-box-title"
+                      style={{ fontSize: "1rem" }}
+                    >
+                      All caught up
+                    </span>
+                    <span
+                      className="state-box-desc"
+                      style={{ fontSize: "0.85rem" }}
+                    >
                       You have no unread notifications at this time.
                     </span>
                   </div>

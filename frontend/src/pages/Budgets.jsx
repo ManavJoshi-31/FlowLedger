@@ -1,9 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
-import { getBudgets, updateBudget, closeBudget } from "../services/budgetService";
+import {
+  getBudgets,
+  updateBudget,
+  closeBudget,
+} from "../services/budgetService";
 import { getDepartments } from "../services/departmentService";
-import BudgetCard from "../components/BudgetCard";
+import BudgetCard from "../components/budget/BudgetCard";
 import "./Budgets.css";
 
 function Budgets() {
@@ -121,7 +125,7 @@ function Budgets() {
 
     if (totalAmount < usedAmount) {
       setEditError(
-        `Total amount cannot be less than already disbursed funds (₹${usedAmount.toLocaleString("en-IN")}).`
+        `Total amount cannot be less than already disbursed funds (₹${usedAmount.toLocaleString("en-IN")}).`,
       );
       return;
     }
@@ -150,10 +154,12 @@ function Budgets() {
       const res = await updateBudget(editingBudget._id, payload);
 
       setBudgets((prev) =>
-        prev.map((b) => (b._id === editingBudget._id ? res.budget : b))
+        prev.map((b) => (b._id === editingBudget._id ? res.budget : b)),
       );
 
-      setActionSuccess(res.message || "Budget allocation updated successfully.");
+      setActionSuccess(
+        res.message || "Budget allocation updated successfully.",
+      );
       setTimeout(() => setActionSuccess(""), 4000);
       setEditingBudget(null);
     } catch (err) {
@@ -185,7 +191,7 @@ function Budgets() {
       const res = await closeBudget(closingBudget._id);
 
       setBudgets((prev) =>
-        prev.map((b) => (b._id === closingBudget._id ? res.budget : b))
+        prev.map((b) => (b._id === closingBudget._id ? res.budget : b)),
       );
 
       setActionSuccess(res.message || "Budget closed successfully.");
@@ -217,7 +223,17 @@ function Budgets() {
         {canManageBudgets && (
           <div className="page-actions">
             <Link to="/budgets/new" className="btn btn-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -229,7 +245,17 @@ function Budgets() {
 
       {actionSuccess && (
         <div className="alert alert-success" role="status">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
@@ -239,7 +265,17 @@ function Budgets() {
 
       {error && (
         <div className="alert alert-error" role="alert">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -259,7 +295,8 @@ function Budgets() {
             >
               <option value="ALL">All Budgets ({budgets.length})</option>
               <option value="ACTIVE">
-                Active Only ({budgets.filter((b) => b.status === "ACTIVE").length})
+                Active Only (
+                {budgets.filter((b) => b.status === "ACTIVE").length})
               </option>
               <option value="CLOSED">
                 Closed ({budgets.filter((b) => b.status === "CLOSED").length})
@@ -283,7 +320,17 @@ function Budgets() {
         <section aria-label="Departmental Budgets">
           {filteredBudgets.length === 0 ? (
             <div className="state-box">
-              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-steel)" }}>
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: "var(--color-steel)" }}
+              >
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
@@ -324,7 +371,12 @@ function Budgets() {
 
       {/* Edit Budget Modal */}
       {editingBudget && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-budget-title">
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-budget-title"
+        >
           <div className="modal-dialog">
             <div className="modal-header">
               <h2 id="edit-budget-title" className="modal-title">
@@ -355,19 +407,29 @@ function Budgets() {
                   <div className="budget-info-row">
                     <span>Disbursed so far</span>
                     <span style={{ color: "var(--color-slate)" }}>
-                      ₹{Number(editingBudget.usedAmount || 0).toLocaleString("en-IN")}
+                      ₹
+                      {Number(editingBudget.usedAmount || 0).toLocaleString(
+                        "en-IN",
+                      )}
                     </span>
                   </div>
                   <div className="budget-info-row">
                     <span>Current Allocation</span>
                     <span>
-                      ₹{Number(editingBudget.totalAmount || 0).toLocaleString("en-IN")}
+                      ₹
+                      {Number(editingBudget.totalAmount || 0).toLocaleString(
+                        "en-IN",
+                      )}
                     </span>
                   </div>
                 </div>
 
                 {editError && (
-                  <div className="alert alert-error" role="alert" style={{ marginBottom: "1rem" }}>
+                  <div
+                    className="alert alert-error"
+                    role="alert"
+                    style={{ marginBottom: "1rem" }}
+                  >
                     <span>{editError}</span>
                   </div>
                 )}
@@ -377,7 +439,9 @@ function Budgets() {
                     New Total Budget Amount (₹) *
                   </label>
                   <div className="input-with-affix">
-                    <span className="input-prefix" aria-hidden="true">₹</span>
+                    <span className="input-prefix" aria-hidden="true">
+                      ₹
+                    </span>
                     <input
                       id="edit-totalAmount"
                       name="totalAmount"
@@ -390,11 +454,22 @@ function Budgets() {
                     />
                   </div>
                   <p className="form-helper-text">
-                    Must be at least ₹{Number(editingBudget.usedAmount || 0).toLocaleString("en-IN")} to cover already disbursed funds.
+                    Must be at least ₹
+                    {Number(editingBudget.usedAmount || 0).toLocaleString(
+                      "en-IN",
+                    )}{" "}
+                    to cover already disbursed funds.
                   </p>
                 </div>
 
-                <div className="form-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div
+                  className="form-grid-2col"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1rem",
+                  }}
+                >
                   <div className="form-field">
                     <label htmlFor="edit-startDate">Fiscal Start Date *</label>
                     <input
@@ -445,10 +520,19 @@ function Budgets() {
 
       {/* Close Budget Confirmation Modal */}
       {closingBudget && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="close-budget-title">
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="close-budget-title"
+        >
           <div className="modal-dialog">
             <div className="modal-header">
-              <h2 id="close-budget-title" className="modal-title" style={{ color: "var(--color-danger-text)" }}>
+              <h2
+                id="close-budget-title"
+                className="modal-title"
+                style={{ color: "var(--color-danger-text)" }}
+              >
                 Close Department Budget
               </h2>
               <button
@@ -473,19 +557,33 @@ function Budgets() {
                 ?
               </p>
 
-              <div className="budget-info-summary" style={{ borderLeft: "3px solid var(--color-danger-text)" }}>
+              <div
+                className="budget-info-summary"
+                style={{ borderLeft: "3px solid var(--color-danger-text)" }}
+              >
                 <div className="budget-info-row">
                   <span>Total Allocated:</span>
-                  <span>₹{Number(closingBudget.totalAmount || 0).toLocaleString("en-IN")}</span>
+                  <span>
+                    ₹
+                    {Number(closingBudget.totalAmount || 0).toLocaleString(
+                      "en-IN",
+                    )}
+                  </span>
                 </div>
                 <div className="budget-info-row">
                   <span>Disbursed to Date:</span>
-                  <span>₹{Number(closingBudget.usedAmount || 0).toLocaleString("en-IN")}</span>
+                  <span>
+                    ₹
+                    {Number(closingBudget.usedAmount || 0).toLocaleString(
+                      "en-IN",
+                    )}
+                  </span>
                 </div>
                 <div className="budget-info-row">
                   <span>Remaining Unspent:</span>
                   <span style={{ color: "var(--color-teal)" }}>
-                    ₹{(
+                    ₹
+                    {(
                       Number(closingBudget.totalAmount || 0) -
                       Number(closingBudget.usedAmount || 0)
                     ).toLocaleString("en-IN")}
@@ -493,16 +591,23 @@ function Budgets() {
                 </div>
               </div>
 
-              <div className="alert alert-error" style={{ marginBottom: 0, fontSize: "0.85rem" }}>
+              <div
+                className="alert alert-error"
+                style={{ marginBottom: 0, fontSize: "0.85rem" }}
+              >
                 <span>
-                  <strong>Important:</strong> Once closed, this budget becomes read-only.
-                  Employees will not be able to submit requests against it, and no pending
-                  requests can be approved. This action cannot be reversed.
+                  <strong>Important:</strong> Once closed, this budget becomes
+                  read-only. Employees will not be able to submit requests
+                  against it, and no pending requests can be approved. This
+                  action cannot be reversed.
                 </span>
               </div>
 
               {closeError && (
-                <div className="alert alert-error" style={{ marginTop: "1rem" }}>
+                <div
+                  className="alert alert-error"
+                  style={{ marginTop: "1rem" }}
+                >
                   <span>{closeError}</span>
                 </div>
               )}
