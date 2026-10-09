@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import CreateBudget from "./pages/CreateBudget";
+import CreateBudget from "./pages/budget/CreateBudget";
 import AppLayout from "./layouts/AppLayout";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Budgets from "./pages/Budgets";
-import CreateFinancialRequest from "./pages/CreateFinancialRequest";
-import DepartmentManagement from "./pages/DepartmentManagement";
-import UserManagement from "./pages/UserManagement";
-import AuditLogs from "./pages/AuditLogs";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Login from "./pages/auth/Login";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Budgets from "./pages/budget/Budgets";
+import CreateFinancialRequest from "./pages/financialRequest/CreateFinancialRequest";
+import DepartmentManagement from "./pages/department/DepartmentManagement";
+import UserManagement from "./pages/user/UserManagement";
+import AuditLogs from "./pages/audit/AuditLogs";
 function App() {
   return (
     <BrowserRouter>
