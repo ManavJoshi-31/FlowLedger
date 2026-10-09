@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import {
   approveFinancialRequest,
   rejectFinancialRequest,
-} from "../services/financialRequestService";
+} from "../../services/financialRequestService";
 import "./FinancialRequestItem.css";
 
 function FinancialRequestItem({ request, onRequestUpdated }) {
