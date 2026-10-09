@@ -9,7 +9,6 @@ function AuditLogs() {
 
   const [logs, setLogs] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [limitationNotice, setLimitationNotice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -39,7 +38,6 @@ function AuditLogs() {
         if (isMounted) {
           setLogs(data.logs || []);
           setSummary(data.summary || null);
-          setLimitationNotice(data.backendLimitation || null);
         }
       } catch (err) {
         if (isMounted) {
@@ -71,7 +69,6 @@ function AuditLogs() {
       const data = await getAuditHistory(user);
       setLogs(data.logs || []);
       setSummary(data.summary || null);
-      setLimitationNotice(data.backendLimitation || null);
     } catch (err) {
       console.error("Failed to refresh audit history:", err);
       setError(
@@ -190,24 +187,6 @@ function AuditLogs() {
         </div>
       </header>
 
-      {/* Backend Architecture Transparency Notice */}
-      {limitationNotice && (
-        <aside className="audit-notice-card" aria-label="Backend architecture status notice">
-          <div className="audit-notice-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-          </div>
-          <div className="audit-notice-content">
-            <strong>Backend Source of Truth</strong>
-            <span>
-              {limitationNotice.message} All activity items and timestamps displayed below represent live, verified state transitions returned by active FlowLedger backend services.
-            </span>
-          </div>
-        </aside>
-      )}
 
       {/* Summary Metrics Cards */}
       <section className="audit-metrics-grid" aria-label="Audit summary metrics">

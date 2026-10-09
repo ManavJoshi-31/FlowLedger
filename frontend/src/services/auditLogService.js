@@ -16,16 +16,10 @@ import { getDepartments } from "./departmentService";
  * authenticated user's role is permitted to access.
  */
 
-export const BACKEND_AUDIT_LIMITATION = {
-  hasDirectApiEndpoint: false,
-  message:
-    "Direct GET /api/audit-logs API endpoint is not yet exposed by the backend. Activity history is compiled from authoritative backend domain records (Financial Requests, Budgets, Users, Departments).",
-};
-
 /**
  * Fetches and synthesizes audit history from authorized backend endpoints.
  * @param {Object} currentUser The authenticated user object from AuthContext
- * @returns {Promise<{ logs: Array, summary: Object, backendLimitation: Object }>}
+ * @returns {Promise<{ logs: Array, summary: Object }>}
  */
 export const getAuditHistory = async (currentUser) => {
   const role = currentUser?.role;
@@ -353,6 +347,5 @@ export const getAuditHistory = async (currentUser) => {
   return {
     logs,
     summary,
-    backendLimitation: BACKEND_AUDIT_LIMITATION,
   };
 };
