@@ -3,9 +3,9 @@ import {
   getDepartments,
   createDepartment,
   updateDepartment,
-} from "../services/departmentService";
-import { getDepartmentManagers } from "../services/userService";
-import "./Management.css";
+} from "../../services/departmentService";
+import { getDepartmentManagers } from "../../services/userService";
+import "./DepartmentManagement.css";
 
 function DepartmentManagement() {
   const [departments, setDepartments] = useState([]);

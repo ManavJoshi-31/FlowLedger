@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { createFinancialRequest } from "../services/financialRequestService";
-import "./Forms.css";
+import { createFinancialRequest } from "../../services/financialRequestService";
+import "./CreateFinancialRequest.css";
 
 function CreateFinancialRequest() {
   const [formData, setFormData] = useState({

@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import {
   getBudgets,
   updateBudget,
   closeBudget,
-} from "../services/budgetService";
-import { getDepartments } from "../services/departmentService";
-import BudgetCard from "../components/budget/BudgetCard";
+} from "../../services/budgetService";
+import { getDepartments } from "../../services/departmentService";
+import BudgetCard from "../../components/budget/BudgetCard";
 import "./Budgets.css";
 
 function Budgets() {

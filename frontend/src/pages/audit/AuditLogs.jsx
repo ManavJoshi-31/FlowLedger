@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useMemo } from "react";
-import AuthContext from "../context/AuthContext";
-import { getAuditHistory } from "../services/auditLogService";
-import AuditLogTable from "../components/audit/AuditLogTable";
+import AuthContext from "../../context/AuthContext";
+import { getAuditHistory } from "../../services/auditLogService";
+import AuditLogTable from "../../components/audit/AuditLogTable";
 import "./AuditLogs.css";
 
 function AuditLogs() {

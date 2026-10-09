@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import AuthContext from "../context/AuthContext";
-import { getUsers, createUser, updateUser } from "../services/userService";
-import { getDepartments } from "../services/departmentService";
-import "./Management.css";
+import AuthContext from "../../context/AuthContext";
+import { getUsers, createUser, updateUser } from "../../services/userService";
+import { getDepartments } from "../../services/departmentService";
+import "./UserManagement.css";
 
 function UserManagement() {
   const { user } = useContext(AuthContext);

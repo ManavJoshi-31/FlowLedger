@@ -1,17 +1,17 @@
 import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
-import DashboardCard from "../components/dashboard/DashboardCard";
+import AuthContext from "../../context/AuthContext";
+import DashboardCard from "../../components/dashboard/DashboardCard";
 import {
   getDashboardNotifications,
   markNotificationAsRead,
-} from "../services/dashboardService";
-import NotificationItem from "../components/notification/NotificationItem";
-import BudgetCard from "../components/budget/BudgetCard";
-import { getBudgets } from "../services/budgetService";
-import { getDepartments } from "../services/departmentService";
-import { getFinancialRequests } from "../services/financialRequestService";
-import FinancialRequestList from "../components/financialRequest/FinancialRequestList";
+} from "../../services/dashboardService";
+import NotificationItem from "../../components/notification/NotificationItem";
+import BudgetCard from "../../components/budget/BudgetCard";
+import { getBudgets } from "../../services/budgetService";
+import { getDepartments } from "../../services/departmentService";
+import { getFinancialRequests } from "../../services/financialRequestService";
+import FinancialRequestList from "../../components/financialRequest/FinancialRequestList";
 import "./Dashboard.css";
 
 function Dashboard() {
