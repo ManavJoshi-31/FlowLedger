@@ -1,0 +1,316 @@
+/* ==========================================================================
+   FlowLedger — 403 Forbidden Access Page Stylesheet
+   Theme: Classic Institutional Dark Palette (Deep Ink #0d1527, Slate #1c2838)
+   ========================================================================== */
+
+.forbidden-page-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  color: #0d1527;
+  padding: 3rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-system, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+}
+
+/* When embedded inside AppLayout's main content area */
+.app-main-content .forbidden-page-root {
+  min-height: calc(100vh - 130px);
+  background: transparent;
+  padding: 2.5rem 1rem;
+}
+
+.forbidden-page-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.forbidden-sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.35;
+}
+
+.forbidden-sphere.sphere-slate {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(28, 40, 56, 0.15) 0%, rgba(13, 21, 39, 0.04) 70%);
+  top: -100px;
+  right: -50px;
+}
+
+.forbidden-sphere.sphere-ink {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(13, 21, 39, 0.12) 0%, rgba(30, 66, 159, 0.04) 70%);
+  bottom: -80px;
+  left: -50px;
+}
+
+.forbidden-card {
+  position: relative;
+  z-index: 10;
+  max-width: 580px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(13, 21, 39, 0.06), 0 0 20px rgba(13, 21, 39, 0.02);
+}
+
+.forbidden-shield-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0d1527;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 14px rgba(13, 21, 39, 0.05);
+}
+
+.forbidden-shield-svg {
+  stroke: #0d1527;
+}
+
+.forbidden-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #0d1527;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}
+
+.forbidden-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  animation: forbiddenPulse 2s infinite;
+}
+
+@keyframes forbiddenPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.forbidden-code {
+  font-size: 4.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #0d1527;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-primary, 'Playfair Display', Georgia, serif);
+  background: linear-gradient(135deg, #0d1527 25%, #1e429f 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.forbidden-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0d1527;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+}
+
+.forbidden-description {
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+/* Role Comparison Box */
+.forbidden-role-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.role-box-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.role-box-row.required-row {
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.65rem;
+}
+
+.role-box-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.role-chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.active-chip {
+  background: #e2e8f0;
+  color: #0d1527;
+  border-color: #cbd5e1;
+}
+
+.required-chip {
+  background: #f1f5f9;
+  color: #0d1527;
+  border-color: #cbd5e1;
+}
+
+.badge-role-admin {
+  background: #0d1527;
+  color: #ffffff;
+  border-color: #0d1527;
+}
+
+.badge-role-finance {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.badge-role-dept {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.badge-role-emp {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+/* Action Buttons with High-Contrast Dark Hover */
+.forbidden-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.forbidden-actions .btn-error-primary,
+.forbidden-actions a.btn-error-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0d1527 0%, #1c2838 100%);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  border: 1px solid #0d1527;
+  box-shadow: 0 4px 14px rgba(13, 21, 39, 0.25);
+  transition: all 0.2s ease;
+}
+
+.forbidden-actions .btn-error-primary:hover,
+.forbidden-actions a.btn-error-primary:hover {
+  background: linear-gradient(135deg, #1c2838 0%, #0d1527 100%);
+  border-color: #1c2838;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 21, 39, 0.35);
+  color: #ffffff !important;
+}
+
+.forbidden-actions .btn-error-secondary,
+.forbidden-actions a.btn-error-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #0d1527 !important;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.forbidden-actions .btn-error-secondary:hover,
+.forbidden-actions a.btn-error-secondary:hover {
+  background: #f1f5f9;
+  color: #0d1527 !important;
+  border-color: #0d1527;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 21, 39, 0.08);
+}
+
+.forbidden-footer {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .forbidden-card {
+    padding: 2.25rem 1.5rem;
+  }
+
+  .forbidden-code {
+    font-size: 3.5rem;
+  }
+
+  .forbidden-title {
+    font-size: 1.45rem;
+  }
+
+  .role-box-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

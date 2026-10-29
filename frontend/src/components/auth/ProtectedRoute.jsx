@@ -10,7 +10,13 @@ function ProtectedRoute({ allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <Navigate
+        to="/403"
+        replace
+        state={{ currentRole: user?.role, requiredRoles: allowedRoles }}
+      />
+    );
   }
 
   return <Outlet />;
