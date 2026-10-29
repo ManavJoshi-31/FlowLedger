@@ -94,6 +94,6 @@
 
 .notification-read-btn:hover {
   background-color: var(--color-teal);
-  color: #ffffff;
+  color: #ffffff !important;
   border-color: var(--color-teal);
 }
