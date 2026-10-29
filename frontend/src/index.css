@@ -1,63 +1,67 @@
 :root {
-  /* Brand Core Palette */
-  --color-ink: #0e1525;
-  --color-slate: #27344b;
-  --color-teal: #345b63;
-  --color-steel: #6b7a90;
-  --color-seafoam: #7fb7ae;
-  --color-mint: #d4ecdd;
-  --color-ivory: #fbfaf7;
-  --color-cobalt: #3b5bdb;
-  --color-copper: #c6773e;
+  /* Brand Core Palette — Classic Institutional Finance */
+  --color-ink: #0d1527;
+  --color-slate: #1c2838;
+  --color-teal: #1a474d;
+  --color-teal-dark: #123337;
+  --color-steel: #506173;
+  --color-seafoam: #3b7e77;
+  --color-mint: #e1eeeb;
+  --color-ivory: #fbf9f5;
+  --color-parchment: #f4efe6;
+  --color-cobalt: #1e429f;
+  --color-copper: #a3521b;
+  --color-brass: #966b1a;
+  --color-brass-light: #fdf6e6;
 
-  /* Surfaces & Borders */
+  /* Surfaces & Architectural Borders */
   --color-surface: #ffffff;
-  --color-surface-subtle: #f6f8f6;
-  --color-surface-hover: #edf2ee;
-  --color-border: #e2e7e4;
-  --color-border-subtle: #edf1ee;
-  --color-border-focus: #345b63;
+  --color-surface-subtle: #f7f4ed;
+  --color-surface-hover: #f0ebe0;
+  --color-border: #ddd8ce;
+  --color-border-subtle: #ebe6dc;
+  --color-border-focus: #1a474d;
 
   /* Text & Contrast */
-  --color-text-main: #0e1525;
-  --color-text-muted: #576579;
-  --color-text-subtle: #8493a8;
+  --color-text-main: #0d1527;
+  --color-text-muted: #4e5d6d;
+  --color-text-subtle: #758394;
   --color-text-inverse: #ffffff;
 
-  /* Semantic Feedback */
-  --color-success-bg: #eaf6ef;
-  --color-success-text: #1a634a;
-  --color-success-border: #c4e8d4;
+  /* Semantic Financial Feedback (WCAG AA & AAA Compliant) */
+  --color-success-bg: #eaf5ee;
+  --color-success-text: #124b37;
+  --color-success-border: #b8e1cb;
 
-  --color-warning-bg: #fdf5ec;
-  --color-warning-text: #96521e;
-  --color-warning-border: #f8dabf;
+  --color-warning-bg: #fdf5ea;
+  --color-warning-text: #7e4210;
+  --color-warning-border: #f3d7b4;
 
-  --color-danger-bg: #fbeeed;
-  --color-danger-text: #9a2828;
-  --color-danger-border: #f6c8c8;
+  --color-danger-bg: #fdf0ef;
+  --color-danger-text: #872121;
+  --color-danger-border: #f4c4c4;
 
-  --color-info-bg: #edf2fc;
-  --color-info-text: #2d48a3;
-  --color-info-border: #c7d7f7;
+  --color-info-bg: #eef4fd;
+  --color-info-text: #1b3d8b;
+  --color-info-border: #c4d7f7;
 
   /* Typography */
   --font-primary: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
-  /* Elevation & Shadows */
-  --shadow-xs: 0 1px 2px rgba(14, 21, 37, 0.04);
-  --shadow-sm: 0 2px 5px rgba(14, 21, 37, 0.06), 0 1px 2px rgba(14, 21, 37, 0.04);
-  --shadow-md: 0 6px 16px -2px rgba(14, 21, 37, 0.08), 0 2px 6px -1px rgba(14, 21, 37, 0.04);
-  --shadow-lg: 0 16px 32px -4px rgba(14, 21, 37, 0.1), 0 6px 12px -2px rgba(14, 21, 37, 0.05);
-  --shadow-focus: 0 0 0 3px rgba(52, 91, 99, 0.22);
-  --shadow-focus-danger: 0 0 0 3px rgba(198, 119, 62, 0.25);
+  /* Elevation & Architectural Shadows */
+  --shadow-xs: 0 1px 2px rgba(13, 21, 39, 0.04);
+  --shadow-sm: 0 2px 5px rgba(13, 21, 39, 0.05), 0 1px 2px rgba(13, 21, 39, 0.03);
+  --shadow-md: 0 6px 18px -2px rgba(13, 21, 39, 0.08), 0 2px 6px -1px rgba(13, 21, 39, 0.03);
+  --shadow-lg: 0 18px 36px -4px rgba(13, 21, 39, 0.1), 0 6px 14px -2px rgba(13, 21, 39, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(26, 71, 77, 0.22);
+  --shadow-focus-danger: 0 0 0 3px rgba(163, 82, 27, 0.22);
 
   /* Radii */
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
   --radius-pill: 9999px;
 
   /* Transitions */
@@ -86,6 +90,18 @@ body {
   background-color: var(--color-ivory);
   color: var(--color-text-main);
   line-height: 1.5;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Tabular numerals for precision ledger amounts */
+.tabular-nums,
+.budget-figure-spent,
+.kpi-card-value,
+.stat-value,
+.table td,
+.metric-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 #root {
@@ -133,7 +149,7 @@ a {
   transition: color var(--transition-fast);
 }
 
-a:hover {
+a:hover:not(.btn):not([class*="btn"]):not(.sidebar-link):not(.sidebar-cta-btn):not(.quick-action-tile):not(.filter-tab-btn) {
   color: var(--color-slate);
 }
 
@@ -239,7 +255,9 @@ a:focus-visible {
 }
 
 /* Button Component Utilities */
-.btn {
+.btn,
+a.btn,
+button.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -255,53 +273,139 @@ a:focus-visible {
   white-space: nowrap;
 }
 
-.btn-primary {
+/* Primary Dark Teal Button */
+.btn-primary,
+.btn-primary *,
+a.btn-primary,
+a.btn-primary *,
+button.btn-primary,
+button.btn-primary * {
   background-color: var(--color-teal);
-  color: #ffffff;
+  color: #ffffff !important;
   border-color: var(--color-teal);
   box-shadow: var(--shadow-sm);
+  fill: currentColor;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-slate);
-  border-color: var(--color-slate);
+.btn-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) *,
+a.btn-primary:hover:not(:disabled),
+a.btn-primary:hover:not(:disabled) *,
+button.btn-primary:hover:not(:disabled),
+button.btn-primary:hover:not(:disabled) * {
+  background-color: var(--color-teal-dark);
+  color: #ffffff !important;
+  border-color: var(--color-teal-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+  fill: currentColor;
 }
 
-.btn-secondary {
+/* Secondary Light Button */
+.btn-secondary,
+.btn-secondary *,
+a.btn-secondary,
+a.btn-secondary *,
+button.btn-secondary,
+button.btn-secondary * {
   background-color: var(--color-surface);
-  color: var(--color-slate);
+  color: var(--color-ink) !important;
   border-color: var(--color-border);
   box-shadow: var(--shadow-xs);
+  fill: currentColor;
 }
 
-.btn-secondary:hover:not(:disabled) {
+.btn-secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) *,
+a.btn-secondary:hover:not(:disabled),
+a.btn-secondary:hover:not(:disabled) *,
+button.btn-secondary:hover:not(:disabled),
+button.btn-secondary:hover:not(:disabled) * {
   background-color: var(--color-surface-hover);
   border-color: var(--color-steel);
-  color: var(--color-ink);
+  color: var(--color-ink) !important;
+  transform: translateY(-1px);
+  fill: currentColor;
 }
 
-.btn-success {
+/* Success Dark Green/Teal Button */
+.btn-success,
+.btn-success *,
+a.btn-success,
+a.btn-success *,
+button.btn-success,
+button.btn-success * {
   background-color: var(--color-teal);
-  color: #ffffff;
+  color: #ffffff !important;
   border-color: var(--color-teal);
+  fill: currentColor;
 }
 
-.btn-success:hover:not(:disabled) {
-  background-color: #26444a;
-  border-color: #26444a;
+.btn-success:hover:not(:disabled),
+.btn-success:hover:not(:disabled) *,
+a.btn-success:hover:not(:disabled),
+a.btn-success:hover:not(:disabled) *,
+button.btn-success:hover:not(:disabled),
+button.btn-success:hover:not(:disabled) * {
+  background-color: var(--color-teal-dark);
+  color: #ffffff !important;
+  border-color: var(--color-teal-dark);
+  transform: translateY(-1px);
+  fill: currentColor;
 }
 
-.btn-danger {
+/* Danger Button */
+.btn-danger,
+.btn-danger *,
+a.btn-danger,
+a.btn-danger *,
+button.btn-danger,
+button.btn-danger * {
   background-color: var(--color-surface);
-  color: var(--color-danger-text);
+  color: var(--color-danger-text) !important;
   border-color: var(--color-danger-border);
+  fill: currentColor;
 }
 
-.btn-danger:hover:not(:disabled) {
-  background-color: var(--color-danger-bg);
+.btn-danger:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) *,
+a.btn-danger:hover:not(:disabled),
+a.btn-danger:hover:not(:disabled) *,
+button.btn-danger:hover:not(:disabled),
+button.btn-danger:hover:not(:disabled) * {
+  background-color: var(--color-danger-text);
+  color: #ffffff !important;
   border-color: var(--color-danger-text);
+  transform: translateY(-1px);
+  fill: currentColor;
+}
+
+/* Dark Navy Button (For high-contrast dark buttons anywhere) */
+.btn-dark,
+.btn-dark *,
+a.btn-dark,
+a.btn-dark *,
+button.btn-dark,
+button.btn-dark * {
+  background-color: var(--color-ink);
+  color: #ffffff !important;
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  fill: currentColor;
+}
+
+.btn-dark:hover:not(:disabled),
+.btn-dark:hover:not(:disabled) *,
+a.btn-dark:hover:not(:disabled),
+a.btn-dark:hover:not(:disabled) *,
+button.btn-dark:hover:not(:disabled),
+button.btn-dark:hover:not(:disabled) * {
+  background-color: #1a2538;
+  color: #ffffff !important;
+  border-color: #2e3e57;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  fill: currentColor;
 }
 
 .btn-sm {
@@ -514,4 +618,17 @@ a:focus-visible {
 .card:hover {
   box-shadow: var(--shadow-sm);
   border-color: #d8deda;
+}
+
+/* Financial Tabular Numerics & Font Helpers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.font-serif {
+  font-family: var(--font-primary);
+}
+
+.font-sans {
+  font-family: var(--font-system);
 }

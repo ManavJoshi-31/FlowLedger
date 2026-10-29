@@ -1,0 +1,148 @@
+/* ==========================================================================
+   FlowLedger — System-Wide Classic Dark Institutional Theme
+   Authoritative enterprise financial palette (Deep Ink, Dark Slate, Classic Teal)
+   ========================================================================== */
+
+:root {
+  /* Core Palette — Classic Institutional Dark Palette */
+  --color-ink: #0d1527;           /* Deep institutional ink navy */
+  --color-slate: #1c2838;         /* Dark architectural slate */
+  --color-teal: #1a474d;          /* Classic deep dark institutional teal */
+  --color-teal-dark: #123337;     /* Midnight teal */
+  --color-steel: #506173;         /* Neutral slate text */
+  --color-seafoam: #2c585e;       /* Deep muted seafoam */
+  --color-mint: #eef4f4;          /* Softest neutral tint */
+  --color-ivory: #f8fafc;         /* Crisp, clean light background */
+  --color-parchment: #f1f5f9;     /* Soft secondary background */
+  --color-cobalt: #1e429f;        /* Deep financial cobalt */
+  --color-copper: #a3521b;        /* Warm copper */
+  --color-brass: #966b1a;         /* Deep brass */
+  --color-brass-light: #fef3c7;   /* Brass tint */
+
+  /* Surfaces & Architectural Borders */
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+  --color-border-focus: #0d1527;
+
+  /* Text & Contrast */
+  --color-text-main: #0d1527;
+  --color-text-muted: #475569;
+  --color-text-subtle: #64748b;
+  --color-text-inverse: #ffffff;
+
+  /* Semantic Feedback */
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #166534;
+  --color-success-border: #bbf7d0;
+
+  --color-warning-bg: #fffbeb;
+  --color-warning-text: #92400e;
+  --color-warning-border: #fde68a;
+
+  --color-danger-bg: #fef2f2;
+  --color-danger-text: #991b1b;
+  --color-danger-border: #fecaca;
+
+  --color-info-bg: #eff6ff;
+  --color-info-text: #1e40af;
+  --color-info-border: #bfdbfe;
+
+  /* Elevation & Architectural Shadows */
+  --shadow-xs: 0 1px 2px rgba(13, 21, 39, 0.04);
+  --shadow-sm: 0 2px 6px rgba(13, 21, 39, 0.05), 0 1px 2px rgba(13, 21, 39, 0.03);
+  --shadow-md: 0 6px 18px -2px rgba(13, 21, 39, 0.08), 0 2px 6px -1px rgba(13, 21, 39, 0.03);
+  --shadow-lg: 0 16px 32px -4px rgba(13, 21, 39, 0.1), 0 4px 10px -2px rgba(13, 21, 39, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(13, 21, 39, 0.18);
+  --shadow-focus-danger: 0 0 0 3px rgba(153, 27, 27, 0.2);
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+}
+
+/* Global Body & Root Overrides */
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-text-main);
+}
+
+/* Enhanced Table Styling */
+.table th {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-main);
+}
+
+.table tr:hover td {
+  background-color: var(--color-surface-hover);
+}
+
+/* Cards & Surfaces Enhancement */
+.card,
+.dashboard-card,
+.budget-card,
+.kpi-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.card:hover,
+.dashboard-card:hover,
+.budget-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: var(--shadow-md);
+}
+
+/* Primary Action Buttons (Classic Dark Institutional Ink) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-ink) 0%, var(--color-slate) 100%);
+  color: #ffffff !important;
+  border: 1px solid var(--color-ink);
+  box-shadow: 0 2px 8px rgba(13, 21, 39, 0.25);
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1c2838 0%, #0d1527 100%);
+  border-color: #1c2838;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(13, 21, 39, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Form Controls with Dark Focus Rings */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}

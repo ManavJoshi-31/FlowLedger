@@ -1,12 +1,13 @@
 import { useContext, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import "./Login.css";
 
-function Login() {
+export default function Login() {
   const { login, isAuthenticated } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,19 +18,17 @@ function Login() {
     setError("");
 
     if (!email.trim() || !password) {
-      setError("Please provide both email and password.");
+      setError("Please provide both enterprise email and password.");
       return;
     }
 
     try {
       setLoading(true);
-      const data = await login(email, password);
-      console.log("Login successful:", data);
+      await login(email.trim(), password);
       navigate("/dashboard");
     } catch (err) {
       const errorMsg =
-        err.response?.data?.message || "Invalid credentials. Please try again.";
-      console.error("Login failed:", errorMsg);
+        err.response?.data?.message || "Invalid credentials. Please verify your email and password.";
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -41,80 +40,152 @@ function Login() {
   }
 
   return (
-    <div className="login-container">
-      <main className="login-card">
-        <div className="login-header">
-          <div className="login-emblem" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-              <path d="M7 8h10" />
-              <path d="M7 12h5" />
-            </svg>
+    <div className="login-light-root">
+      {/* Background Ambience with Dark Slate Accents */}
+      <div className="login-light-mesh" aria-hidden="true">
+        <div className="login-light-sphere sphere-dark" />
+        <div className="login-light-sphere sphere-slate" />
+        <div className="login-light-grid" />
+      </div>
+
+      <div className="login-light-container">
+        {/* Left Side: Enterprise Security Verification Panel */}
+        <div className="login-light-brand-panel">
+          <div>
+            <Link to="/" className="login-back-link">
+              ← Return to FlowLedger Overview
+            </Link>
+
+            <div className="brand-light-badge">
+              <span className="brand-dot-dark" /> Enterprise Security Protocol
+            </div>
+
+            <h2 className="login-brand-heading">
+              Deterministic capital control for <span className="serif-light-accent">enterprise scale.</span>
+            </h2>
+
+            <p className="login-brand-sub">
+              Access is restricted to authorized organization personnel. Sessions are protected by stateless
+              JWT tokens with continuous tenant isolation and defense-in-depth role authorizations.
+            </p>
           </div>
-          <h1 className="login-title">FlowLedger</h1>
-          <p className="login-subtitle">Sign in to manage financial requests &amp; budgets</p>
+
+          <div className="security-assurance-box">
+            <div className="assurance-head">
+              <span className="assurance-shield">🛡️</span>
+              <span>Security &amp; Compliance Standards</span>
+            </div>
+            <ul className="assurance-list">
+              <li>
+                <span className="assurance-check">✓</span>
+                <span>Tenant-Isolated Database Partitioning</span>
+              </li>
+              <li>
+                <span className="assurance-check">✓</span>
+                <span>Cryptographic Bcrypt Credential Hashing</span>
+              </li>
+              <li>
+                <span className="assurance-check">✓</span>
+                <span>Strict 4-Tier Role-Based Permissions</span>
+              </li>
+              <li>
+                <span className="assurance-check">✓</span>
+                <span>Immutable Forensic Audit Logging</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {error && (
-          <div className="alert alert-error" role="alert">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span>{error}</span>
-          </div>
-        )}
+        {/* Right Side: The Sign In Form Card */}
+        <div className="login-light-form-panel">
+          <div className="login-form-card">
+            <div className="login-card-header">
+              <div className="card-brand">
+                <span className="card-brand-icon">❖</span>
+                <span className="card-brand-name">Flow<span className="brand-dark-text">Ledger</span></span>
+              </div>
+              <h1 className="card-title">Sign in to your account</h1>
+              <p className="card-desc">Enter your organizational credentials to continue</p>
+            </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-field">
-            <label htmlFor="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@company.com"
-              autoComplete="email"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••"
-              autoComplete="current-password"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
-            {loading ? (
-              <>
-                <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></span>
-                <span>Signing in...</span>
-              </>
-            ) : (
-              "Sign In"
+            {error && (
+              <div className="login-error-alert animate-shake" role="alert">
+                <span className="error-icon">⚠️</span>
+                <span>{error}</span>
+              </div>
             )}
-          </button>
-        </form>
 
-        <div className="login-footer">
-          <span>Enterprise Ledger &bull; Secure Multi-Tenant Governance</span>
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="email">Enterprise Email</label>
+                <div className="input-wrapper">
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    className="login-input"
+                    autoComplete="email"
+                  />
+                  <span className="input-icon">✉</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="label-row">
+                  <label htmlFor="password">Password</label>
+                </div>
+                <div className="input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="login-input"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex="-1"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="login-submit-btn"
+              >
+                {loading ? (
+                  <span className="btn-spinner" />
+                ) : (
+                  <>
+                    <span>Authenticate Session</span>
+                    <span className="arrow">→</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="login-card-footer">
+              <p className="security-notice">
+                🔒 Protected by End-to-End Enterprise Encryption &amp; Real-Time Tenant Isolation
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
-
-export default Login;
