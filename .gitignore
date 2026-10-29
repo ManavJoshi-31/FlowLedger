@@ -13,5 +13,14 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Local dev docs — not tracked
+# Agent & Dev instructions
+.agents/
+AGENTS.md
+*AGENTS.md
+*agents/
+
+# Documentation & Project Reports
 docs/
+*project_report*
+*Project_Report*
+FlowLedger_Project_Report.pdf
