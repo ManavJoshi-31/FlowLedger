@@ -26,7 +26,11 @@ const ROLE_METADATA = {
   },
 };
 
-export default function Forbidden({ currentRole: propRole, requiredRoles: propRequiredRoles, customMessage }) {
+export default function Forbidden({
+  currentRole: propRole,
+  requiredRoles: propRequiredRoles,
+  customMessage,
+}) {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const location = useLocation();
 
@@ -47,11 +51,19 @@ export default function Forbidden({ currentRole: propRole, requiredRoles: propRe
       return "Department structuring, manager assignment, and tenant-level configurations require Organization Administrator governance privileges.";
     }
 
-    if (required.includes("FINANCE_MANAGER") && required.includes("ORGANIZATION_ADMIN") && required.length === 2) {
+    if (
+      required.includes("FINANCE_MANAGER") &&
+      required.includes("ORGANIZATION_ADMIN") &&
+      required.length === 2
+    ) {
       return "Budget envelope creation and capital allocation are restricted to Finance Managers and Organization Administrators under the platform's separation of duties policy.";
     }
 
-    if (required.includes("DEPARTMENT_MANAGER") && required.includes("ORGANIZATION_ADMIN") && required.length === 2) {
+    if (
+      required.includes("DEPARTMENT_MANAGER") &&
+      required.includes("ORGANIZATION_ADMIN") &&
+      required.length === 2
+    ) {
       return "User provisioning, employee role delegation, and cryptographic audit log inspection are restricted to Department Managers and Organization Administrators.";
     }
 
@@ -108,12 +120,14 @@ export default function Forbidden({ currentRole: propRole, requiredRoles: propRe
         <div className="forbidden-role-box">
           <div className="role-box-row">
             <span className="role-box-label">Your Active Role:</span>
-            <span className={`role-chip active-chip ${activeRoleMeta.badgeClass}`}>
+            <span
+              className={`role-chip active-chip ${activeRoleMeta.badgeClass}`}
+            >
               {activeRoleMeta.label}
             </span>
           </div>
 
-          {required.length > 0 && (
+          {/* {required.length > 0 && (
             <div className="role-box-row required-row">
               <span className="role-box-label">Authorized Role(s):</span>
               <div className="role-chips-group">
@@ -124,7 +138,7 @@ export default function Forbidden({ currentRole: propRole, requiredRoles: propRe
                 ))}
               </div>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="forbidden-actions">
@@ -150,10 +164,12 @@ export default function Forbidden({ currentRole: propRole, requiredRoles: propRe
         </div>
 
         <div className="forbidden-footer">
-          <span>FlowLedger Multi-Tenant Defense-in-Depth Authorization &bull; Role-Based Governance</span>
+          <span>
+            FlowLedger Multi-Tenant Defense-in-Depth Authorization &bull;
+            Role-Based Governance
+          </span>
         </div>
       </div>
     </div>
   );
 }
-
