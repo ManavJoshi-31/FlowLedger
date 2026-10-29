@@ -1,0 +1,243 @@
+/* ==========================================================================
+   TopNav — Top Utility Header Stylesheet
+   ========================================================================== */
+
+.app-topnav {
+  height: 60px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+}
+
+.topnav-container {
+  width: 100%;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Left Section */
+.topnav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topnav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: var(--radius-xs);
+  transition: background-color var(--transition-fast);
+}
+
+.topnav-hamburger:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.topnav-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.breadcrumb-root {
+  font-weight: 500;
+  color: var(--color-text-subtle);
+}
+
+.breadcrumb-separator {
+  color: var(--color-border);
+  font-size: 0.8rem;
+}
+
+.breadcrumb-current {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.breadcrumb-bullet {
+  color: var(--color-border);
+}
+
+.topnav-tenant-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tenant-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-teal);
+  flex-shrink: 0;
+}
+
+/* Right Section */
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.topnav-date-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  padding: 0.25rem 0.5rem;
+}
+
+.topnav-divider {
+  width: 1px;
+  height: 22px;
+  background-color: var(--color-border);
+}
+
+/* Notification Bell Button */
+.topnav-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-slate);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.topnav-bell-btn:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.topnav-bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  background-color: var(--color-teal);
+  color: #ffffff;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid var(--color-surface);
+}
+
+/* User Profile Card */
+.topnav-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.topnav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+}
+
+.topnav-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.topnav-user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.2;
+}
+
+.topnav-user-role {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* Logout Button */
+.topnav-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.topnav-logout-btn:hover {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+/* Breakpoints */
+@media (max-width: 1024px) {
+  .topnav-hamburger {
+    display: flex;
+  }
+
+  .topnav-tenant-pill,
+  .breadcrumb-bullet {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .topnav-date-strip,
+  .topnav-divider {
+    display: none;
+  }
+
+  .topnav-user-details {
+    display: none;
+  }
+}

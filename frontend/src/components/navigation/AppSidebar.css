@@ -1,0 +1,230 @@
+/* ==========================================================================
+   AppSidebar — Enterprise Institutional Navigation Stylesheet
+   ========================================================================== */
+
+.app-sidebar {
+  width: 260px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: transform var(--transition-normal);
+}
+
+.sidebar-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+/* Brand Header */
+.sidebar-brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  position: relative;
+}
+
+.sidebar-brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-ink);
+  color: var(--color-ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-brand-tenant {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  margin-left: auto;
+}
+
+/* Quick Action CTA */
+.sidebar-cta-section {
+  padding: 1rem 0 0.5rem;
+}
+
+.sidebar-cta-btn,
+a.sidebar-cta-btn {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-teal);
+  color: #ffffff !important;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.sidebar-cta-btn,
+.sidebar-cta-btn *,
+a.sidebar-cta-btn,
+a.sidebar-cta-btn * {
+  color: #ffffff !important;
+}
+
+.sidebar-cta-btn:hover,
+.sidebar-cta-btn:hover *,
+a.sidebar-cta-btn:hover,
+a.sidebar-cta-btn:hover * {
+  background-color: var(--color-teal-dark);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Navigation Menu */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  flex: 1;
+}
+
+.sidebar-nav-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0.65rem 0.2rem;
+  margin-bottom: 0.15rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border-left: 2px solid transparent;
+}
+
+.sidebar-link svg {
+  color: var(--color-steel);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.sidebar-link:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-ink);
+}
+
+.sidebar-link:hover svg {
+  color: var(--color-teal);
+}
+
+.sidebar-link.active {
+  background-color: var(--color-surface-subtle);
+  color: var(--color-ink);
+  font-weight: 600;
+  border-left-color: var(--color-teal);
+}
+
+.sidebar-link.active svg {
+  color: var(--color-teal);
+}
+
+/* Footer Section */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-version-tag {
+  font-size: 0.68rem;
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+
+/* Mobile Responsiveness */
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .app-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(14, 21, 37, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 99;
+  }
+}
