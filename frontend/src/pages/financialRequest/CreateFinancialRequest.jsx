@@ -161,6 +161,18 @@ function CreateFinancialRequest() {
                 <option value="TRAINING">Training</option>
                 <option value="OTHER">Other</option>
               </select>
+              <div className="category-pills-row" role="group" aria-label="Quick category selector">
+                {["PURCHASE", "TRAVEL", "REIMBURSEMENT", "TRAINING", "OTHER"].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={`category-pill ${formData.category === cat ? "selected" : ""}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, category: cat }))}
+                  >
+                    {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Amount */}
@@ -180,6 +192,16 @@ function CreateFinancialRequest() {
                   required
                 />
               </div>
+              {Number(formData.amount) > 0 && (
+                <div className="amount-live-preview">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span>
+                    Allocation Quota: ₹{Number(formData.amount).toLocaleString("en-IN")} INR
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

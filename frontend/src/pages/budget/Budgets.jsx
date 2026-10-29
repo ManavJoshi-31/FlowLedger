@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import {
@@ -204,6 +204,24 @@ function Budgets() {
     }
   };
 
+  const budgetMetrics = useMemo(() => {
+    let totalAllocated = 0;
+    let totalSpent = 0;
+    let activeCount = 0;
+
+    budgets.forEach((b) => {
+      if (b.status === "ACTIVE") activeCount++;
+      totalAllocated += Number(b.totalAmount) || 0;
+      totalSpent += Number(b.spentAmount) || 0;
+    });
+
+    const remaining = Math.max(0, totalAllocated - totalSpent);
+    const utilizationPct =
+      totalAllocated > 0 ? Math.round((totalSpent / totalAllocated) * 100) : 0;
+
+    return { totalAllocated, totalSpent, remaining, activeCount, utilizationPct };
+  }, [budgets]);
+
   const filteredBudgets = budgets.filter((b) => {
     if (statusFilter === "ACTIVE") return b.status === "ACTIVE";
     if (statusFilter === "CLOSED") return b.status === "CLOSED";
@@ -282,6 +300,44 @@ function Budgets() {
           </svg>
           <span>{error}</span>
         </div>
+      )}
+
+      {!loading && budgets.length > 0 && (
+        <section className="budgets-kpi-grid" aria-label="Budget Overview Metrics">
+          <div className="budgets-kpi-card">
+            <span className="budgets-kpi-label">Total Allocated</span>
+            <span className="budgets-kpi-value font-tabular">
+              ₹{budgetMetrics.totalAllocated.toLocaleString("en-IN")}
+            </span>
+            <span className="budgets-kpi-subtext">Cumulative organizational caps</span>
+          </div>
+
+          <div className="budgets-kpi-card">
+            <span className="budgets-kpi-label">Total Disbursed</span>
+            <span className="budgets-kpi-value font-tabular">
+              ₹{budgetMetrics.totalSpent.toLocaleString("en-IN")}
+            </span>
+            <span className="budgets-kpi-subtext">Approved financial expenses</span>
+          </div>
+
+          <div className="budgets-kpi-card">
+            <span className="budgets-kpi-label">Remaining Buffer</span>
+            <span className="budgets-kpi-value font-tabular" style={{ color: "var(--color-teal)" }}>
+              ₹{budgetMetrics.remaining.toLocaleString("en-IN")}
+            </span>
+            <span className="budgets-kpi-subtext">Uncommitted treasury balance</span>
+          </div>
+
+          <div className="budgets-kpi-card">
+            <span className="budgets-kpi-label">Budget Pacing</span>
+            <span className="budgets-kpi-value font-tabular">
+              {budgetMetrics.utilizationPct}%
+            </span>
+            <span className="budgets-kpi-subtext">
+              {budgetMetrics.activeCount} active department periods
+            </span>
+          </div>
+        </section>
       )}
 
       {!loading && budgets.length > 0 && (

@@ -4,6 +4,63 @@
   gap: 1.75rem;
 }
 
+/* Aggregate Fiscal KPI Strip */
+.budgets-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .budgets-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .budgets-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.budgets-kpi-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.4rem;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.budgets-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.budgets-kpi-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+}
+
+.budgets-kpi-value {
+  font-family: var(--font-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.15;
+}
+
+.budgets-kpi-subtext {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
 .budgets-filter-bar {
   display: flex;
   align-items: center;

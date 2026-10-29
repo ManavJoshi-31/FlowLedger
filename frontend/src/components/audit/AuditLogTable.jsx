@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import "./AuditLogTable.css";
+
+const AUDIT_PAGE_SIZE = 10;
 
 function AuditLogTable({
   logs = [],
@@ -9,6 +11,12 @@ function AuditLogTable({
   viewMode = "table",
 }) {
   const [expandedLogId, setExpandedLogId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever logs array reference changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [logs.length]);
 
   const toggleExpand = (logId) => {
     setExpandedLogId((prev) => (prev === logId ? null : logId));
@@ -102,7 +110,7 @@ function AuditLogTable({
     return (
       <div className="audit-empty-card">
         <div className="audit-empty-icon" aria-hidden="true">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14 2 14 8 20 8" />
             <line x1="16" y1="13" x2="8" y2="13" />
@@ -110,91 +118,137 @@ function AuditLogTable({
             <polyline points="10 9 9 9 8 9" />
           </svg>
         </div>
-        <h3 className="audit-empty-title">No Audit Events Found</h3>
+        <h3 className="audit-empty-title">No Audit Events Recorded</h3>
         <p className="audit-empty-subtitle">
-          No matching activity history records were found for the selected criteria.
+          When financial requests, departmental budgets, or authorization decisions occur in this organization,
+          they will be permanently logged here.
         </p>
       </div>
     );
   }
 
+  // Pagination computations
+  const totalPages = Math.max(1, Math.ceil(logs.length / AUDIT_PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * AUDIT_PAGE_SIZE;
+  const endIndex = Math.min(startIndex + AUDIT_PAGE_SIZE, logs.length);
+  const paginatedLogs = logs.slice(startIndex, endIndex);
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="audit-pagination-bar">
+        <span className="audit-pagination-info">
+          Showing <strong>{startIndex + 1}</strong> to <strong>{endIndex}</strong> of{" "}
+          <strong>{logs.length}</strong> events
+        </span>
+        <div className="audit-pagination-actions">
+          <button
+            type="button"
+            className="audit-page-btn"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={safeCurrentPage === 1}
+            aria-label="Previous Page"
+          >
+            ← Prev
+          </button>
+          <div className="audit-pagination-chips">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                type="button"
+                className={`audit-chip-btn ${safeCurrentPage === pageNum ? "active" : ""}`}
+                onClick={() => setCurrentPage(pageNum)}
+              >
+                {pageNum}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="audit-page-btn"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safeCurrentPage === totalPages}
+            aria-label="Next Page"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // TIMELINE VIEW
   if (viewMode === "timeline") {
     return (
-      <div className="audit-timeline">
-        {logs.map((log) => {
-          const badgeClass = getActionBadgeClass(log.action, log.severity);
-          const markerClass =
-            log.severity === "success"
-              ? "success"
-              : log.severity === "danger"
-              ? "danger"
-              : log.severity === "warning"
-              ? "warning"
-              : "";
-
-          return (
-            <div key={log.id} className="audit-timeline-item">
-              <div className={`audit-timeline-marker ${markerClass}`}>
-                {log.action.includes("APPROVED") ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : log.action.includes("REJECTED") ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                ) : log.action.includes("CREATED") ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                )}
-              </div>
-
-              <div className="audit-timeline-card">
-                <div className="audit-timeline-header">
-                  <div className="audit-timeline-title-area">
-                    <h4 className="audit-timeline-title">{log.title}</h4>
-                    <span className={`audit-badge ${badgeClass}`}>
-                      {log.actionLabel}
-                    </span>
-                    <span className="audit-badge audit-badge-entity">
-                      {log.entityType}
-                    </span>
-                  </div>
-
-                  <div className="audit-timeline-meta">
-                    <span>{formatDate(log.timestamp)}</span>
-                    <span>&bull;</span>
-                    <span>{formatTime(log.timestamp)}</span>
-                  </div>
+      <div className="audit-timeline-wrapper">
+        <div className="audit-timeline-stream">
+          {paginatedLogs.map((log) => {
+            const badgeClass = getActionBadgeClass(log.action, log.severity);
+            return (
+              <div key={log.id} className="audit-timeline-item">
+                <div className={`audit-timeline-node ${badgeClass}`}>
+                  {log.action.includes("APPROVED") ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : log.action.includes("REJECTED") ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  ) : log.action.includes("CREATED") ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  )}
                 </div>
 
-                <p className="audit-timeline-desc">{log.description}</p>
-
-                {log.details && (
-                  <div className="audit-timeline-details-chips">
-                    <span className="audit-detail-chip">
-                      <strong>Actor:</strong> {log.actor?.name || "System"} ({log.actor?.role || "Staff"})
-                    </span>
-                    {Object.entries(log.details).map(([key, val]) => (
-                      <span key={key} className="audit-detail-chip">
-                        <strong>{key}:</strong> {String(val)}
+                <div className="audit-timeline-card">
+                  <div className="audit-timeline-header">
+                    <div className="audit-timeline-title-area">
+                      <h4 className="audit-timeline-title">{log.title}</h4>
+                      <span className={`audit-badge ${badgeClass}`}>
+                        {log.actionLabel}
                       </span>
-                    ))}
+                      <span className="audit-badge audit-badge-entity">
+                        {log.entityType}
+                      </span>
+                    </div>
+
+                    <div className="audit-timeline-meta">
+                      <span>{formatDate(log.timestamp)}</span>
+                      <span>&bull;</span>
+                      <span>{formatTime(log.timestamp)}</span>
+                    </div>
                   </div>
-                )}
+
+                  <p className="audit-timeline-desc">{log.description}</p>
+
+                  {log.details && (
+                    <div className="audit-timeline-details-chips">
+                      <span className="audit-detail-chip">
+                        <strong>Actor:</strong> {log.actor?.name || "System"} ({log.actor?.role || "Staff"})
+                      </span>
+                      {Object.entries(log.details).map(([key, val]) => (
+                        <span key={key} className="audit-detail-chip">
+                          <strong>{key}:</strong> {String(val)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        {renderPagination()}
       </div>
     );
   }
@@ -215,19 +269,18 @@ function AuditLogTable({
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => {
+            {paginatedLogs.map((log) => {
               const isExpanded = expandedLogId === log.id;
               const badgeClass = getActionBadgeClass(log.action, log.severity);
 
               return (
-                <tr key={log.id} style={{ display: "contents" }}>
-                  <tr className={`audit-table-row ${isExpanded ? "expanded" : ""}`}>
+                <Fragment key={log.id}>
+                  <tr className={isExpanded ? "audit-row-expanded" : ""}>
                     <td>
                       <div className="audit-action-cell">
                         <span className={`audit-badge ${badgeClass}`}>
                           {log.actionLabel}
                         </span>
-                        <span className="audit-action-code">{log.action}</span>
                       </div>
                     </td>
 
@@ -321,9 +374,9 @@ function AuditLogTable({
                               </span>
                             </div>
                             <div className="audit-detail-item">
-                              <span className="audit-detail-key">Timestamp (ISO)</span>
+                              <span className="audit-detail-key">Timestamp</span>
                               <span className="audit-detail-val" style={{ fontSize: "0.82rem" }}>
-                                {log.timestamp.toISOString()}
+                                {log.timestamp.toLocaleString("en-IN")}
                               </span>
                             </div>
                             <div className="audit-detail-item">
@@ -345,12 +398,13 @@ function AuditLogTable({
                       </td>
                     </tr>
                   )}
-                </tr>
+                </Fragment>
               );
             })}
           </tbody>
         </table>
       </div>
+      {renderPagination()}
     </div>
   );
 }

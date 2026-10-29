@@ -163,6 +163,43 @@ function CreateBudget() {
       return;
     }
 
+    // Check if a budget already exists for this department with same dates or same fiscal year (YYYY to YYYY)
+    if (!isUpdateMode) {
+      const formStart = new Date(formData.startDate);
+      const formEnd = new Date(formData.endDate);
+      const formStartDay = formStart.toISOString().split("T")[0];
+      const formEndDay = formEnd.toISOString().split("T")[0];
+      const formStartYear = formStart.getUTCFullYear();
+      const formEndYear = formEnd.getUTCFullYear();
+
+      const conflictingBudget = departmentBudgets.find((b) => {
+        const bStart = new Date(b.period?.startDate);
+        const bEnd = new Date(b.period?.endDate);
+        const bStartDay = bStart.toISOString().split("T")[0];
+        const bEndDay = bEnd.toISOString().split("T")[0];
+        const bStartYear = bStart.getUTCFullYear();
+        const bEndYear = bEnd.getUTCFullYear();
+
+        const sameDates = bStartDay === formStartDay && bEndDay === formEndDay;
+        const sameFiscalYear =
+          bStartYear === formStartYear && bEndYear === formEndYear;
+
+        return sameDates || sameFiscalYear;
+      });
+
+      if (conflictingBudget) {
+        const fyiYear =
+          formStartYear === formEndYear
+            ? `${formStartYear}`
+            : `${formStartYear}–${formEndYear}`;
+        setError(
+          `Budget already exists for this fiscal year (${fyiYear}), you can update that.`
+        );
+        setConflictBudget(conflictingBudget);
+        return;
+      }
+    }
+
     // If updating, totalAmount cannot be less than usedAmount
     if (isUpdateMode && selectedExistingBudget) {
       const usedAmount = Number(selectedExistingBudget.usedAmount) || 0;
@@ -228,10 +265,24 @@ function CreateBudget() {
 
       // Check if this was a 409 Conflict because budget already exists for this period
       if (err.response?.status === 409) {
+        const existingId = err.response?.data?.existingBudgetId;
         const matched = departmentBudgets.find((b) => {
-          const bStart = toInputDate(b.period?.startDate);
-          const bEnd = toInputDate(b.period?.endDate);
-          return bStart === formData.startDate && bEnd === formData.endDate;
+          if (existingId && b._id === existingId) return true;
+          const bStart = new Date(b.period?.startDate);
+          const bEnd = new Date(b.period?.endDate);
+          const formStart = new Date(formData.startDate);
+          const formEnd = new Date(formData.endDate);
+
+          const bStartDay = bStart.toISOString().split("T")[0];
+          const bEndDay = bEnd.toISOString().split("T")[0];
+          const formStartDay = formStart.toISOString().split("T")[0];
+          const formEndDay = formEnd.toISOString().split("T")[0];
+
+          return (
+            (bStartDay === formStartDay && bEndDay === formEndDay) ||
+            (bStart.getUTCFullYear() === formStart.getUTCFullYear() &&
+              bEnd.getUTCFullYear() === formEnd.getUTCFullYear())
+          );
         });
 
         if (matched) {
