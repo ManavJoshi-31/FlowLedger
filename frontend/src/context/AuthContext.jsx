@@ -5,13 +5,22 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("flowledger_user");
+    // Session-scoped storage: cleared automatically when the browser is closed
+    const storedUser = sessionStorage.getItem("flowledger_user");
+
+    // Clean up any legacy persistent tokens in localStorage
+    try {
+      localStorage.removeItem("flowledger_token");
+      localStorage.removeItem("flowledger_user");
+    } catch {
+      // Ignore storage access errors
+    }
 
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
   const [token, setToken] = useState(() => {
-    return localStorage.getItem("flowledger_token");
+    return sessionStorage.getItem("flowledger_token");
   });
 
   const login = async (email, password) => {
@@ -25,8 +34,9 @@ export function AuthProvider({ children }) {
     setToken(token);
     setUser(user);
 
-    localStorage.setItem("flowledger_token", token);
-    localStorage.setItem("flowledger_user", JSON.stringify(user));
+    // Save strictly to sessionStorage so closing browser logs user out immediately
+    sessionStorage.setItem("flowledger_token", token);
+    sessionStorage.setItem("flowledger_user", JSON.stringify(user));
 
     return response.data;
   };
@@ -35,8 +45,15 @@ export function AuthProvider({ children }) {
     setToken(null);
     setUser(null);
 
-    localStorage.removeItem("flowledger_token");
-    localStorage.removeItem("flowledger_user");
+    sessionStorage.removeItem("flowledger_token");
+    sessionStorage.removeItem("flowledger_user");
+
+    try {
+      localStorage.removeItem("flowledger_token");
+      localStorage.removeItem("flowledger_user");
+    } catch {
+      // Ignore storage access errors
+    }
   };
 
   const value = {

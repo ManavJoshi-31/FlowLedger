@@ -5,7 +5,8 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("flowledger_token");
+  // Retrieve token from session storage (cleared upon browser close)
+  const token = sessionStorage.getItem("flowledger_token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -20,8 +21,15 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("flowledger_token");
-      localStorage.removeItem("flowledger_user");
+      sessionStorage.removeItem("flowledger_token");
+      sessionStorage.removeItem("flowledger_user");
+
+      try {
+        localStorage.removeItem("flowledger_token");
+        localStorage.removeItem("flowledger_user");
+      } catch {
+        // Ignore storage access errors
+      }
 
       window.location.href = "/login";
     }
