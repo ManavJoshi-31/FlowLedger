@@ -126,8 +126,13 @@ function UserManagement() {
       };
 
       const data = await createUser(payload);
+      const newUser = {
+        ...data.user,
+        _id: data.user?._id || data.user?.id,
+        id: data.user?.id || data.user?._id,
+      };
 
-      setUsers((currentUsers) => [...currentUsers, data.user]);
+      setUsers((currentUsers) => [...currentUsers, newUser]);
 
       setFormData({
         name: "",
@@ -207,11 +212,18 @@ function UserManagement() {
         payload.departmentId = editFormData.departmentId;
       }
 
-      const data = await updateUser(editingUser._id, payload);
+      const targetId = editingUser._id || editingUser.id;
+      const data = await updateUser(targetId, payload);
+
+      const updatedUser = {
+        ...data.user,
+        _id: data.user?._id || data.user?.id || targetId,
+        id: data.user?.id || data.user?._id || targetId,
+      };
 
       setUsers((currentUsers) =>
         currentUsers.map((u) =>
-          u._id === editingUser._id ? data.user : u,
+          (u._id === targetId || u.id === targetId) ? updatedUser : u,
         ),
       );
 
@@ -544,15 +556,16 @@ function UserManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => {
+                  {users.map((u, index) => {
+                    const userId = u._id || u.id || `user-${index}`;
                     const department = departments.find(
                       (d) => d._id === u.departmentId,
                     );
-                    const isSelected = editingUser?._id === u._id;
+                    const isSelected = (editingUser?._id || editingUser?.id) === userId;
 
                     return (
                       <tr
-                        key={u._id}
+                        key={userId}
                         style={isSelected ? { backgroundColor: "#f0f7f5" } : undefined}
                       >
                         <td>
